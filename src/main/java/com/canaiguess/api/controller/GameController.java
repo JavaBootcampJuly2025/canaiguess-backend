@@ -3,6 +3,7 @@ package com.canaiguess.api.controller;
 import com.canaiguess.api.dto.GameRequestDTO;
 import com.canaiguess.api.dto.GameResponseDTO;
 import com.canaiguess.api.service.GameService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
@@ -20,12 +21,11 @@ public class GameController {
     @PostMapping
     public ResponseEntity<GameResponseDTO> createGame(
             @RequestBody GameRequestDTO request
-            //,@AuthenticationPrincipal User user
+            //@AuthenticationPrincipal User user // TODO
     ) {
-        // For now, use a dummy userId; later, pull from logged-in user
-        String userId = "dummy-user"; // TODO: Replace with real user id
+        //String userId = (user != null) ? user.getId() : null;
 
-        GameResponseDTO response = gameService.createGame(request, userId);
+        GameResponseDTO response = gameService.createGame(request, null);
         return ResponseEntity.ok(response);
     }
 }
