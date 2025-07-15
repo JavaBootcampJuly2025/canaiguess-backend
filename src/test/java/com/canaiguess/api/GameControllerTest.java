@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -33,5 +34,14 @@ public class GameControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.gameId").isNotEmpty());
     }
+
+    @Test
+    void getGameById_nonExistingId_shouldReturnNotFound() throws Exception {
+        String nonExistentId = "does-not-exist";
+        mockMvc.perform(get("/api/game/" + nonExistentId))
+                .andExpect(status().isNotFound());
+    }
+
+
 }
 

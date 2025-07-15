@@ -1,5 +1,6 @@
 package com.canaiguess.api.service;
 
+import com.canaiguess.api.dto.GameDTO;
 import com.canaiguess.api.dto.GameRequestDTO;
 import com.canaiguess.api.dto.GameResponseDTO;
 import com.canaiguess.api.model.Game;
@@ -25,4 +26,16 @@ public class GameService {
         Game saved = gameRepository.save(game);
         return new GameResponseDTO(saved.getId());
     }
+
+    public GameDTO getGameById(String gameId) {
+        return gameRepository.findById(gameId)
+            .map(game -> GameDTO.builder()
+                    .gameMode(game.getGameMode())
+                    .batchesLeft(game.getBatches())
+                    .difficulty(game.getDifficulty())
+                    .build()
+            )
+            .orElse(null);
+    }
+
 }
