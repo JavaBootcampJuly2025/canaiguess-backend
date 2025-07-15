@@ -18,12 +18,7 @@ public class Points {
         this.accuracy = accuracy;
         this.difficulty = difficulty;
     }
-
-
-
     public int calculateScore() {
         return (int) (difficulty * accuracy);
     }
-
-
 }
