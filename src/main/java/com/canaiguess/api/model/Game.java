@@ -17,7 +17,7 @@ public class Game {
     private String gameMode;
     private int batches;
     private int difficulty;
-    private String userId; // set from authentication if you want
-
-    // Add more fields as needed
+    private String userId;
+    private int currentBatch;
+    private boolean finished; // derived from batches and currentBatch
 }
