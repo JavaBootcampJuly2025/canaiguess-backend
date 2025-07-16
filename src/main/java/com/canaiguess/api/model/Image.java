@@ -15,8 +15,11 @@ public class Image {
     private Long id;
 
     private String filename;
+
     private boolean image_type; // true = ai, false = real
+
     private int total_guesses;
+
     private int correct_guesses;
 
 }

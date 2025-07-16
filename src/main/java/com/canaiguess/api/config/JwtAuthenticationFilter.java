@@ -1,6 +1,6 @@
-package com.canaiguess.api.security.config;
+package com.canaiguess.api.config;
 
-import com.canaiguess.api.security.service.JwtService;
+import com.canaiguess.api.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

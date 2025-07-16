@@ -1,6 +1,6 @@
-package com.canaiguess.api.security.repository;
+package com.canaiguess.api.repository;
 
-import com.canaiguess.api.security.model.User;
+import com.canaiguess.api.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -1,6 +1,6 @@
-package com.canaiguess.api.security.model;
+package com.canaiguess.api.model;
 
-import com.canaiguess.api.security.enums.Role;
+import com.canaiguess.api.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

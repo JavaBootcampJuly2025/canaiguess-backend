@@ -29,4 +29,5 @@ public class ImageGame {
     private int batchNumber;
 
     private Boolean userGuessedCorrectly; // to track user specific results (for drill down)
+
 }

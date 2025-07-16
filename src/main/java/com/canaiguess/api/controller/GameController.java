@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 public class GameController {
 
     private final GameService gameService;
-
     public GameController(GameService gameService) {
         this.gameService = gameService;
     }
@@ -21,21 +20,22 @@ public class GameController {
     @PostMapping
     public ResponseEntity<NewGameResponseDTO> createGame(
             @RequestBody NewGameRequestDTO request
-            //@AuthenticationPrincipal User user // TODO
+            // @AuthenticationPrincipal User user // TODO
     ) {
 
-        //String userId = (user != null) ? user.getId() : null;
-
+        // String userId = (user != null) ? user.getId() : null;
         NewGameResponseDTO response = gameService.createGame(request, null);
         return ResponseEntity.ok(response);
+
     }
 
     // TODO: check authorization as only logged in users may resume a game
-    @GetMapping("/api/game/{gameId}")
+    @GetMapping("/{gameId}")
     public ResponseEntity<GameInfoResponseDTO> getGameById(@PathVariable String gameId) {
         GameInfoResponseDTO game = gameService.getGameById(gameId);
         if (game != null) {
             return ResponseEntity.ok(game);
+
         } else {
             return ResponseEntity.notFound().build();
         }
