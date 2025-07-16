@@ -1,8 +1,8 @@
 package com.canaiguess.api.service;
 
-import com.canaiguess.api.dto.GameDTO;
-import com.canaiguess.api.dto.GameRequestDTO;
-import com.canaiguess.api.dto.GameResponseDTO;
+import com.canaiguess.api.dto.GameInfoResponseDTO;
+import com.canaiguess.api.dto.NewGameRequestDTO;
+import com.canaiguess.api.dto.NewGameResponseDTO;
 import com.canaiguess.api.model.Game;
 import com.canaiguess.api.repository.GameRepository;
 import org.springframework.stereotype.Service;
@@ -11,27 +11,33 @@ import org.springframework.stereotype.Service;
 public class GameService {
 
     private final GameRepository gameRepository;
+    private final ImageGameService imageGameService;
 
-    public GameService(GameRepository gameRepository) {
+    public GameService(GameRepository gameRepository, ImageGameService imageGameService) {
+        this.imageGameService = imageGameService;
         this.gameRepository = gameRepository;
     }
 
-    public GameResponseDTO createGame(GameRequestDTO request, String userId) {
+    public NewGameResponseDTO createGame(NewGameRequestDTO request, String userId) {
         Game game = new Game();
-        game.setGameMode(request.getGameMode());
-        game.setBatches(request.getBatches());
+        game.setBatchCount(request.getBatchCount());
         game.setDifficulty(request.getDifficulty());
         game.setUserId(userId);
 
         Game saved = gameRepository.save(game);
-        return new GameResponseDTO(saved.getId());
+
+        // Delegate image allocation
+        imageGameService.allocateImagesForGame(saved);
+
+        return new NewGameResponseDTO(saved.getId());
     }
 
-    public GameDTO getGameById(String gameId) {
+    public GameInfoResponseDTO getGameById(String gameId) {
         return gameRepository.findById(gameId)
-            .map(game -> GameDTO.builder()
-                    .gameMode(game.getGameMode())
-                    .batchesLeft(game.getBatches())
+            .map(game -> GameInfoResponseDTO.builder()
+                    .batchCount(game.getBatchCount())
+                    .batchSize(game.getBatchSize())
+                    .currentBatch(game.getCurrentBatch())
                     .difficulty(game.getDifficulty())
                     .build()
             )

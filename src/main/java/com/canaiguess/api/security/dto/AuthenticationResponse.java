@@ -1,4 +1,4 @@
-package com.canaiguess.api.dto;
+package com.canaiguess.api.security.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,11 +6,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class GameDTO {
-    private String gameMode;
-    private int batchesLeft;
-    private int difficulty;
+public class AuthenticationResponse {
+
+    private String token;
 }
