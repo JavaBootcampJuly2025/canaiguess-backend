@@ -23,6 +23,8 @@ public class GameService {
         game.setBatchCount(request.getBatchCount());
         game.setDifficulty(request.getDifficulty());
         game.setUserId(userId);
+        game.setBatchSize(request.getBatchSize());
+        game.setCurrentBatch(1);
 
         Game saved = gameRepository.save(game);
 
