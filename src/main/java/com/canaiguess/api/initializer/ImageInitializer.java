@@ -5,6 +5,8 @@ import com.canaiguess.api.repository.ImageRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,8 +28,20 @@ public class ImageInitializer implements CommandLineRunner {
         List<Image> images = new ArrayList<>();
 
         for (int i = 0; i < 2000; i++) {
+            String baseUrl = i < 1000
+                    ? "https://pub-45cdbc8aa7c94d018c9155c86ae133b3.r2.dev/"
+                    : "https://pub-fc94a80f6efd49889bdcbcd7b2c8a513.r2.dev/";
+
+            String fileNameBase = String.format("%04d", i);
+            String fullUrl = checkFileExtension(baseUrl, fileNameBase);
+
+            if (fullUrl == null) {
+                System.out.println("Skipping missing image for: " + fileNameBase);
+                continue;
+            }
+
             Image img = new Image();
-            img.setFilename(String.format("%04d.jpg", i));
+            img.setFilename(fullUrl);
             img.setImage_type(i < 1000); // true = AI, false = real
             img.setTotal_guesses(0);
             img.setCorrect_guesses(0);
@@ -35,5 +49,29 @@ public class ImageInitializer implements CommandLineRunner {
         }
 
         imageRepository.saveAll(images);
+    }
+
+    private String checkFileExtension(String baseUrl, String fileNameBase) {
+        String[] extensions = {"jpg", "png"};
+        for (String ext : extensions) {
+            String url = baseUrl + fileNameBase + "." + ext;
+            if (urlExists(url)) {
+                return url;
+            }
+        }
+        return null;
+    }
+
+    private boolean urlExists(String urlStr) {
+        try {
+            HttpURLConnection connection = (HttpURLConnection) new URL(urlStr).openConnection();
+            connection.setRequestMethod("HEAD");
+            connection.setConnectTimeout(3000);
+            connection.setReadTimeout(3000);
+            int responseCode = connection.getResponseCode();
+            return responseCode == 200;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
