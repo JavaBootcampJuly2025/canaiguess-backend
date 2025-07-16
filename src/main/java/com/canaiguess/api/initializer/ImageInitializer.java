@@ -43,9 +43,9 @@ public class ImageInitializer implements CommandLineRunner {
 
                 Image img = new Image();
                 img.setFilename(fullUrl);
-                img.setImage_type(isAI); // true = AI, false = real
-                img.setTotal_guesses(0);
-                img.setCorrect_guesses(0);
+                img.setFake(isAI); // true = AI, false = real
+                img.setTotal(0);
+                img.setCorrect(0);
                 images.add(img);
             }
         }
