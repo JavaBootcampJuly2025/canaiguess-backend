@@ -60,7 +60,7 @@ public class GameController {
         }
     }
 
-    @PostMapping("/api/game/{gameId}/batch")
+    @PostMapping("/{gameId}/batch")
     @Operation(
             summary = "Fetch next image batch",
             description = "Returns the next set of image URLs for a game"
