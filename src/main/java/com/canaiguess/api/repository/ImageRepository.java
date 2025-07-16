@@ -6,9 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ImageRepository extends JpaRepository<Image, Long> {
     @Query("SELECT i FROM Image i WHERE i.id NOT IN (SELECT ig.image.id FROM ImageGame ig WHERE ig.game.userId = :userId)")
     List<Image> findUnplayedImagesByUser(@Param("userId") long userId);
+
+    Optional<Image> findByFilename(String filename);
 
 }

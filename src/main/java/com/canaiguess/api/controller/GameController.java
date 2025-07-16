@@ -1,13 +1,17 @@
 package com.canaiguess.api.controller;
 
 import com.canaiguess.api.dto.GameInfoResponseDTO;
+import com.canaiguess.api.dto.ImageBatchResponseDTO;
 import com.canaiguess.api.dto.NewGameRequestDTO;
 import com.canaiguess.api.dto.NewGameResponseDTO;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.service.GameService;
+import com.canaiguess.api.service.ImageGameService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
+
+import java.util.List;
 
 // @AuthenticationPrincipal possible
 @RestController
@@ -15,7 +19,9 @@ import org.springframework.http.ResponseEntity;
 public class GameController {
 
     private final GameService gameService;
-    public GameController(GameService gameService) {
+    private final ImageGameService imageGameService;
+    public GameController(GameService gameService, ImageGameService imageGameService) {
+        this.imageGameService = imageGameService;
         this.gameService = gameService;
     }
 
@@ -42,5 +48,15 @@ public class GameController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @PostMapping("/api/game/{gameId}/batch")
+    public ResponseEntity<ImageBatchResponseDTO> getNextBatch(
+            @PathVariable String gameId,
+            @AuthenticationPrincipal User user
+    ) {
+        List<String> imageUrls = imageGameService.getNextBatchForGame(gameId, user.getId());
+        return ResponseEntity.ok(new ImageBatchResponseDTO(imageUrls));
+    }
+
 
 }

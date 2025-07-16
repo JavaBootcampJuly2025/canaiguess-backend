@@ -3,10 +3,12 @@ package com.canaiguess.api.service;
 import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.Image;
 import com.canaiguess.api.model.ImageGame;
+import com.canaiguess.api.repository.GameRepository;
 import com.canaiguess.api.repository.ImageGameRepository;
 import com.canaiguess.api.repository.ImageRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,10 +18,12 @@ public class ImageGameService {
 
     private final ImageRepository imageRepository;
     private final ImageGameRepository imageGameRepository;
+    private final GameRepository gameRepository;
 
-    public ImageGameService(ImageRepository imageRepository, ImageGameRepository imageGameRepository) {
+    public ImageGameService(ImageRepository imageRepository, ImageGameRepository imageGameRepository, GameRepository gameRepository) {
         this.imageRepository = imageRepository;
         this.imageGameRepository = imageGameRepository;
+        this.gameRepository = gameRepository;
     }
 
     public void allocateImagesForGame(Game game) {
@@ -31,10 +35,10 @@ public class ImageGameService {
 
         // rank by distance to target difficulty
         List<Image> sortedByDifficulty = unplayed.stream()
-                .filter(img -> img.getTotal_guesses() > 0)
+                .filter(img -> img.getTotal() > 0)
                 .sorted((a, b) -> {
-                    double da = 1.0 - (a.getCorrect_guesses() / (double) a.getTotal_guesses());
-                    double db = 1.0 - (b.getCorrect_guesses() / (double) b.getTotal_guesses());
+                    double da = 1.0 - (a.getCorrect() / (double) a.getTotal());
+                    double db = 1.0 - (b.getCorrect() / (double) b.getTotal());
                     return Double.compare(Math.abs(da - targetDifficulty), Math.abs(db - targetDifficulty));
                 })
                 .toList();
@@ -50,10 +54,10 @@ public class ImageGameService {
             allImages.removeAll(selected); // avoid duplicates
 
             List<Image> remaining = allImages.stream()
-                    .filter(img -> img.getTotal_guesses() > 0)
+                    .filter(img -> img.getTotal() > 0)
                     .sorted((a, b) -> {
-                        double da = 1.0 - (a.getCorrect_guesses() / (double) a.getTotal_guesses());
-                        double db = 1.0 - (b.getCorrect_guesses() / (double) b.getTotal_guesses());
+                        double da = 1.0 - (a.getCorrect() / (double) a.getTotal());
+                        double db = 1.0 - (b.getCorrect() / (double) b.getTotal());
                         return Double.compare(Math.abs(da - targetDifficulty), Math.abs(db - targetDifficulty));
                     })
                     .limit(totalNeeded - selected.size())
@@ -92,6 +96,68 @@ public class ImageGameService {
             }
         }
     }
+
+    public List<Boolean> validateGuesses(List<String> imageUrls, List<Boolean> guesses) {
+        if (imageUrls.size() != guesses.size()) {
+            throw new IllegalArgumentException("Mismatched image and guess count");
+        }
+
+        List<Boolean> correct = new ArrayList<>();
+
+        for (int i = 0; i < imageUrls.size(); i++) {
+            String url = imageUrls.get(i);
+            boolean userGuess = guesses.get(i);
+
+            Image image = imageRepository.findByFilename(url)
+                    .orElseThrow(() -> new RuntimeException("Image not found"));
+
+            boolean isAI = image.isFake();
+
+            // update statistics
+            image.setTotal(image.getTotal() + 1);
+            if (userGuess == isAI) {
+                image.setCorrect(image.getCorrect() + 1);
+                correct.add(true);
+            } else {
+                correct.add(false);
+            }
+
+            imageRepository.save(image);
+        }
+
+        return correct;
+    }
+
+    public List<String> getNextBatchForGame(String gameId, long userId) {
+        Game game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new RuntimeException("Game not found"));
+
+        if (game.getUserId() != userId) {
+            throw new RuntimeException("Unauthorized access to game");
+        }
+
+        int currentBatch = game.getCurrentBatch();
+
+        if (currentBatch >= game.getBatchCount()) {
+            game.setFinished(true);
+            gameRepository.save(game);
+            return List.of(); // empty batch <=> game finished
+        }
+
+        List<ImageGame> imageGames = imageGameRepository.findByGameAndBatchNumber(game, currentBatch);
+        if (imageGames.isEmpty()) {
+            throw new RuntimeException("No images found for current batch");
+        }
+
+        game.setCurrentBatch(currentBatch + 1);
+        gameRepository.save(game);
+
+        return imageGames.stream()
+                .map(ig -> ig.getImage().getFilename())
+                .toList();
+    }
+
+
 
 }
 
