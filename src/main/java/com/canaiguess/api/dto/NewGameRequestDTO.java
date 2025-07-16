@@ -7,8 +7,8 @@ import lombok.AllArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GameRequestDTO {
-    private String gameMode;
-    private int batches;
+public class NewGameRequestDTO {
+    private int batchCount;
+    private int batchSize;
     private int difficulty;
 }
