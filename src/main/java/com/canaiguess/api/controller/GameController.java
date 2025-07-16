@@ -1,9 +1,6 @@
 package com.canaiguess.api.controller;
 
-import com.canaiguess.api.dto.GameInfoResponseDTO;
-import com.canaiguess.api.dto.ImageBatchResponseDTO;
-import com.canaiguess.api.dto.NewGameRequestDTO;
-import com.canaiguess.api.dto.NewGameResponseDTO;
+import com.canaiguess.api.dto.*;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.service.GameService;
 import com.canaiguess.api.service.ImageGameService;
@@ -72,6 +69,20 @@ public class GameController {
         List<String> imageUrls = imageGameService.getNextBatchForGame(gameId, user.getId());
         return ResponseEntity.ok(new ImageBatchResponseDTO(imageUrls));
     }
+
+    @PostMapping("/{gameId}/results")
+    @Operation(
+            summary = "Get results for a game",
+            description = "Returns the number of correct and incorrect guesses for the game"
+    )
+    public ResponseEntity<GameResultsDTO> getGameResults(
+            @PathVariable Long gameId,
+            @AuthenticationPrincipal User user
+    ) {
+        GameResultsDTO results = gameService.getGameResults(gameId, user.getId());
+        return ResponseEntity.ok(results);
+    }
+
 
 
 }
