@@ -1,9 +1,9 @@
-package com.canaiguess.api.security.controller;
+package com.canaiguess.api.controller;
 
-import com.canaiguess.api.security.dto.AuthenticationRequest;
-import com.canaiguess.api.security.dto.AuthenticationResponse;
-import com.canaiguess.api.security.dto.RegisterRequest;
-import com.canaiguess.api.security.service.AuthenticationService;
+import com.canaiguess.api.dto.AuthenticationRequest;
+import com.canaiguess.api.dto.AuthenticationResponse;
+import com.canaiguess.api.dto.RegisterRequest;
+import com.canaiguess.api.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

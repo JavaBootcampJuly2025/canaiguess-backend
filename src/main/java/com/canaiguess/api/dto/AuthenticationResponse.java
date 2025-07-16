@@ -1,4 +1,4 @@
-package com.canaiguess.api.security.dto;
+package com.canaiguess.api.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

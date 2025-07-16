@@ -3,7 +3,6 @@ package com.canaiguess.api.repository;
 import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.ImageGame;
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.List;
 
 public interface ImageGameRepository extends JpaRepository<ImageGame, Long> {

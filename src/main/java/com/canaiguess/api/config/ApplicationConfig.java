@@ -1,6 +1,6 @@
-package com.canaiguess.api.security.config;
+package com.canaiguess.api.config;
 
-import com.canaiguess.api.security.repository.UserRepository;
+import com.canaiguess.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
