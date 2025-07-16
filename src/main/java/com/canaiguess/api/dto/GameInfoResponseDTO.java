@@ -9,8 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class GameDTO {
-    private String gameMode;
-    private int batchesLeft;
+public class GameInfoResponseDTO {
+    private int batchCount;
+    private int batchSize;
+    private int currentBatch;
     private int difficulty;
 }
