@@ -34,7 +34,7 @@ public class GameService {
         return new NewGameResponseDTO(saved.getId());
     }
 
-    public GameInfoResponseDTO getGameById(String gameId) {
+    public GameInfoResponseDTO getGameById(Long gameId) {
         return gameRepository.findById(gameId)
             .map(game -> GameInfoResponseDTO.builder()
                     .batchCount(game.getBatchCount())

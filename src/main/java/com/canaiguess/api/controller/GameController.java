@@ -50,7 +50,7 @@ public class GameController {
             summary = "Get game by ID",
             description = "Returns game details by ID if it exists"
     )
-    public ResponseEntity<GameInfoResponseDTO> getGameById(@PathVariable String gameId) {
+    public ResponseEntity<GameInfoResponseDTO> getGameById(@PathVariable Long gameId) {
         GameInfoResponseDTO game = gameService.getGameById(gameId);
         if (game != null) {
             return ResponseEntity.ok(game);
@@ -66,7 +66,7 @@ public class GameController {
             description = "Returns the next set of image URLs for a game"
     )
     public ResponseEntity<ImageBatchResponseDTO> getNextBatch(
-            @PathVariable String gameId,
+            @PathVariable Long gameId,
             @AuthenticationPrincipal User user
     ) {
         List<String> imageUrls = imageGameService.getNextBatchForGame(gameId, user.getId());
