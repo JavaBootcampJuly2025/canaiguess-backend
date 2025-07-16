@@ -22,30 +22,32 @@ public class ImageInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         if (imageRepository.count() > 0) {
-            return; // Skip if images already exist
+            return; // Skip if already populated
         }
 
         List<Image> images = new ArrayList<>();
+        String[] domains = {
+                "https://pub-45cdbc8aa7c94d018c9155c86ae133b3.r2.dev/", // AI (fake)
+                "https://pub-fc94a80f6efd49889bdcbcd7b2c8a513.r2.dev/"  // Real
+        };
 
-        for (int i = 0; i < 2000; i++) {
-            String baseUrl = i < 1000
-                    ? "https://pub-45cdbc8aa7c94d018c9155c86ae133b3.r2.dev/"
-                    : "https://pub-fc94a80f6efd49889bdcbcd7b2c8a513.r2.dev/";
-
+        for (int i = 0; i < 1000; i++) {
             String fileNameBase = String.format("%04d", i);
-            String fullUrl = checkFileExtension(baseUrl, fileNameBase);
 
-            if (fullUrl == null) {
-                System.out.println("Skipping missing image for: " + fileNameBase);
-                continue;
+            for (int j = 0; j < 2; j++) {
+                String domain = domains[j];
+                boolean isAI = (j == 0);
+
+                String fullUrl = checkFileExtension(domain, fileNameBase);
+                if (fullUrl == null) { continue; }
+
+                Image img = new Image();
+                img.setFilename(fullUrl);
+                img.setImage_type(isAI); // true = AI, false = real
+                img.setTotal_guesses(0);
+                img.setCorrect_guesses(0);
+                images.add(img);
             }
-
-            Image img = new Image();
-            img.setFilename(fullUrl);
-            img.setImage_type(i < 1000); // true = AI, false = real
-            img.setTotal_guesses(0);
-            img.setCorrect_guesses(0);
-            images.add(img);
         }
 
         imageRepository.saveAll(images);
