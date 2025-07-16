@@ -3,7 +3,9 @@ package com.canaiguess.api.controller;
 import com.canaiguess.api.dto.GameInfoResponseDTO;
 import com.canaiguess.api.dto.NewGameRequestDTO;
 import com.canaiguess.api.dto.NewGameResponseDTO;
+import com.canaiguess.api.model.User;
 import com.canaiguess.api.service.GameService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
@@ -19,12 +21,12 @@ public class GameController {
 
     @PostMapping
     public ResponseEntity<NewGameResponseDTO> createGame(
-            @RequestBody NewGameRequestDTO request
-            // @AuthenticationPrincipal User user // TODO
+            @RequestBody NewGameRequestDTO request,
+            @AuthenticationPrincipal User user
     ) {
 
-        // String userId = (user != null) ? user.getId() : null;
-        NewGameResponseDTO response = gameService.createGame(request, null);
+        long userId = (user != null) ? user.getId() : null;
+        NewGameResponseDTO response = gameService.createGame(request, userId);
         return ResponseEntity.ok(response);
 
     }

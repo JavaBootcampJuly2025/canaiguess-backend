@@ -18,7 +18,7 @@ public class GameService {
         this.gameRepository = gameRepository;
     }
 
-    public NewGameResponseDTO createGame(NewGameRequestDTO request, String userId) {
+    public NewGameResponseDTO createGame(NewGameRequestDTO request, long userId) {
         Game game = new Game();
         game.setBatchCount(request.getBatchCount());
         game.setDifficulty(request.getDifficulty());
