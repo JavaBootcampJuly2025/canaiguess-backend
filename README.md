@@ -61,4 +61,34 @@ Data from the game could be valuable for researchers working on human-AI percept
 - CAPTCHA test at the beginning for unauthorized users
 
 <!-- START API DOCS -->
+
+## API Endpoints
+
+### Authentication
+
+- **POST** `/api/v1/auth/register`  
+  Register a new user and receive a JWT.
+
+- **POST** `/api/v1/auth/authenticate`  
+  Authenticate and receive a JWT.
+
+### Game
+
+- **POST** `/api/game`  
+  Create a new game for the authenticated user.
+
+- **GET** `/api/game/{gameId}`  
+  Get details of a specific game.
+
+- **POST** `/api/game/{gameId}/batch`  
+  Get the next image batch for a game.
+
+- **POST** `/api/game/{gameId}/results`  
+  Get the result (correct/incorrect) stats for a game.
+
+### Guess
+
+- **POST** `/api/guess`  
+  Validate image guesses; returns which were correct.
+
 <!-- END API DOCS -->
