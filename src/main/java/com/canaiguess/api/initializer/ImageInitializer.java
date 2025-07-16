@@ -31,7 +31,7 @@ public class ImageInitializer implements CommandLineRunner {
                 "https://pub-fc94a80f6efd49889bdcbcd7b2c8a513.r2.dev/"  // Real
         };
 
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 1; i <= 1000; i++) {
             String fileNameBase = String.format("%04d", i);
 
             for (int j = 0; j < 2; j++) {
