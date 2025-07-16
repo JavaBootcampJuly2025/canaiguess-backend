@@ -1,0 +1,42 @@
+name: Update README API Docs
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+jobs:
+  update-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build and run Spring Boot app
+        run: |
+          ./mvnw clean package -DskipTests
+          java -jar target/*.jar &
+          sleep 20
+
+      - name: Install Swagger Markdown CLI
+        run: npm install -g @wrdl/swagger-markdown
+
+      - name: Generate Swagger Markdown
+        run: swagger-markdown -i http://localhost:8080/v3/api-docs -o swagger.md
+
+      - name: Inject API docs into README.md
+        run: |
+          awk '/<!-- START API DOCS -->/ {print; system("cat swagger.md"); found=1; next} /<!-- END API DOCS -->/ {found=0} !found' README.md > README_NEW.md
+          mv README_NEW.md README.md
+
+      - name: Commit updated README
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs: update API docs in README"

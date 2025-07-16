@@ -60,10 +60,5 @@ Data from the game could be valuable for researchers working on human-AI percept
 
 - CAPTCHA test at the beginning for unauthorized users
 
-| Endpoint                     | Method | Purpose                     | Request Body                  | Response Body                     |
-| ---------------------------- | ------ | --------------------------- | ----------------------------- | --------------------------------- |
-| `/api/game/{gameId}/results` | POST   | Get results for a game      | –                             | correct, false counts             |
-| `/api/game/`                 | POST   | Start a new game            | gameMode, batches, difficulty | gameId                            |
-| `/api/game/{gameId}`         | POST   | Get an existing game        | –                             | gameMode, batchesLeft, difficulty |
-| `/api/game/{gameId}/batch`   | POST   | Get next batch of images    | –                             | imageId                           |
-| `/api/guess/{imageId}`       | POST   | Submit a guess for an image | gameId, userGuess             | answerCorrect                     |
+<!-- START API DOCS -->
+<!-- END API DOCS -->
