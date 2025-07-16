@@ -1,11 +1,11 @@
-package com.canaiguess.api.security.service;
+package com.canaiguess.api.service;
 
-import com.canaiguess.api.security.dto.AuthenticationRequest;
-import com.canaiguess.api.security.dto.AuthenticationResponse;
-import com.canaiguess.api.security.dto.RegisterRequest;
-import com.canaiguess.api.security.enums.Role;
-import com.canaiguess.api.security.model.User;
-import com.canaiguess.api.security.repository.UserRepository;
+import com.canaiguess.api.dto.AuthenticationRequest;
+import com.canaiguess.api.dto.AuthenticationResponse;
+import com.canaiguess.api.dto.RegisterRequest;
+import com.canaiguess.api.enums.Role;
+import com.canaiguess.api.model.User;
+import com.canaiguess.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

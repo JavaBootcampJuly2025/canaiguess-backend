@@ -1,4 +1,4 @@
-package com.canaiguess.api.security.service;
+package com.canaiguess.api.service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

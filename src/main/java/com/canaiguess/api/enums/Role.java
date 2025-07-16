@@ -1,4 +1,4 @@
-package com.canaiguess.api.security.enums;
+package com.canaiguess.api.enums;
 
 public enum Role {
 
