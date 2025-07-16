@@ -136,7 +136,7 @@ public class ImageGameService {
         return correct;
     }
 
-    public List<String> getNextBatchForGame(String gameId, long userId) {
+    public List<String> getNextBatchForGame(long gameId, long userId) {
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new RuntimeException("Game not found"));
 
