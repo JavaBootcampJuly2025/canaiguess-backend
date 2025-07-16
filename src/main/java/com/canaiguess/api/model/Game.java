@@ -15,7 +15,8 @@ public class Game {
     private String id;
 
     private String gameMode;
-    private int batches;
+    private int batchCount;
+    private int batchSize;
     private int difficulty;
     private String userId;
     private int currentBatch;
