@@ -3,9 +3,11 @@ package com.canaiguess.api.service;
 import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.Image;
 import com.canaiguess.api.model.ImageGame;
+import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.GameRepository;
 import com.canaiguess.api.repository.ImageGameRepository;
 import com.canaiguess.api.repository.ImageRepository;
+import com.canaiguess.api.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,11 +21,17 @@ public class ImageGameService {
     private final ImageRepository imageRepository;
     private final ImageGameRepository imageGameRepository;
     private final GameRepository gameRepository;
+    private final UserRepository userRepository;
 
-    public ImageGameService(ImageRepository imageRepository, ImageGameRepository imageGameRepository, GameRepository gameRepository) {
+    public ImageGameService(ImageRepository imageRepository,
+                            ImageGameRepository imageGameRepository,
+                            GameRepository gameRepository,
+                            UserRepository userRepository) {
+
         this.imageRepository = imageRepository;
         this.imageGameRepository = imageGameRepository;
         this.gameRepository = gameRepository;
+        this.userRepository = userRepository;
     }
 
     public void allocateImagesForGame(Game game) {
@@ -138,9 +146,11 @@ public class ImageGameService {
 
         int currentBatch = game.getCurrentBatch();
 
-        if (currentBatch >= game.getBatchCount()) {
-            game.setFinished(true);
-            gameRepository.save(game);
+        if (currentBatch > game.getBatchCount()) {
+
+            // update user points only and end the game
+            finalizeGameAndUpdateUserPoints(game);
+
             return List.of(); // empty batch <=> game finished
         }
 
@@ -156,6 +166,26 @@ public class ImageGameService {
                 .map(ig -> ig.getImage().getFilename())
                 .toList();
     }
+
+    public void finalizeGameAndUpdateUserPoints(Game game) {
+        List<ImageGame> imageGames = imageGameRepository.findByGame(game);
+
+        long correctGuesses = imageGames.stream()
+                .filter(ImageGame::isUserGuessedCorrectly)
+                .count();
+
+        User user = userRepository.findById(game.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setScore(user.getScore() + (int) correctGuesses);
+        userRepository.save(user);
+
+        System.out.println("User got " + correctGuesses + " correct guesses");
+
+        game.setFinished(true);
+        gameRepository.save(game);
+    }
+
 
 
 
