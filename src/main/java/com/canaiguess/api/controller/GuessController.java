@@ -2,7 +2,7 @@ package com.canaiguess.api.controller;
 
 import com.canaiguess.api.dto.GuessRequestDTO;
 import com.canaiguess.api.dto.GuessResultDTO;
-import com.canaiguess.api.service.ImageGameService;
+import com.canaiguess.api.service.GameSessionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +18,11 @@ import java.util.List;
 @Tag(name = "Guess", description = "Endpoints for validating image guesses")
 public class GuessController {
 
-    private final ImageGameService imageGameService;
-    public GuessController(ImageGameService imageGameService) {
-        this.imageGameService = imageGameService;
+    private final GameSessionService gameSessionService;
+
+    public GuessController(GameSessionService gameSessionService) {
+        this.gameSessionService = gameSessionService;
     }
-
-
 
     @PostMapping
     @Operation(
@@ -31,7 +30,7 @@ public class GuessController {
             description = "Validates user's guesses for a batch of images. Returns which were guessed correctly."
     )
     public ResponseEntity<GuessResultDTO> validateGuesses(@RequestBody GuessRequestDTO guessRequest) {
-        List<Boolean> results = imageGameService.validateGuesses(guessRequest.getImages(), guessRequest.getGuesses());
+        List<Boolean> results = gameSessionService.validateGuesses(guessRequest.getImages(), guessRequest.getGuesses());
         return ResponseEntity.ok(new GuessResultDTO(results));
     }
 

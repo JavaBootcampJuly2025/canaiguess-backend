@@ -17,13 +17,13 @@ public class GameService {
 
     private final GameRepository gameRepository;
     private final ImageGameRepository imageGameRepository;
-    private final ImageGameService imageGameService;
+    private final ImageAllocatorService imageAllocatorService;
 
     public GameService(GameRepository gameRepository,
-                       ImageGameService imageGameService,
+                       ImageAllocatorService imageAllocatorService,
                        ImageGameRepository imageGameRepository) {
         this.imageGameRepository = imageGameRepository;
-        this.imageGameService = imageGameService;
+        this.imageAllocatorService = imageAllocatorService;
         this.gameRepository = gameRepository;
     }
 
@@ -38,7 +38,7 @@ public class GameService {
         Game saved = gameRepository.save(game);
 
         // Delegate image allocation
-        imageGameService.allocateImagesForGame(saved);
+        imageAllocatorService.allocateImagesForGame(saved);
 
         return new NewGameResponseDTO(saved.getId());
     }

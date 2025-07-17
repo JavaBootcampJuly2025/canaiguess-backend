@@ -3,7 +3,7 @@ package com.canaiguess.api.controller;
 import com.canaiguess.api.dto.*;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.service.GameService;
-import com.canaiguess.api.service.ImageGameService;
+import com.canaiguess.api.service.GameSessionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,9 +19,9 @@ import java.util.List;
 public class GameController {
 
     private final GameService gameService;
-    private final ImageGameService imageGameService;
-    public GameController(GameService gameService, ImageGameService imageGameService) {
-        this.imageGameService = imageGameService;
+    private final GameSessionService gameSessionService;
+    public GameController(GameService gameService, GameSessionService gameSessionService) {
+        this.gameSessionService = gameSessionService;
         this.gameService = gameService;
     }
 
@@ -66,7 +66,7 @@ public class GameController {
             @PathVariable Long gameId,
             @AuthenticationPrincipal User user
     ) {
-        List<String> imageUrls = imageGameService.getNextBatchForGame(gameId, user.getId());
+        List<String> imageUrls = gameSessionService.getNextBatchForGame(gameId, user.getId());
         return ResponseEntity.ok(new ImageBatchResponseDTO(imageUrls));
     }
 
