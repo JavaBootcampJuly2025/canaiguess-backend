@@ -51,7 +51,6 @@ public class GameController {
         GameInfoResponseDTO game = gameService.getGameById(gameId);
         if (game != null) {
             return ResponseEntity.ok(game);
-
         } else {
             return ResponseEntity.notFound().build();
         }
