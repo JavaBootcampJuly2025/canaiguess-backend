@@ -16,20 +16,20 @@ import java.util.List;
 @Service
 public class GameSessionService {
 
+    private final ScoringService scoringService;
     private final ImageRepository imageRepository;
     private final ImageGameRepository imageGameRepository;
     private final GameRepository gameRepository;
-    private final UserRepository userRepository;
 
     public GameSessionService(ImageRepository imageRepository,
                             ImageGameRepository imageGameRepository,
                             GameRepository gameRepository,
-                            UserRepository userRepository) {
+                            ScoringService scoringService) {
 
         this.imageRepository = imageRepository;
         this.imageGameRepository = imageGameRepository;
         this.gameRepository = gameRepository;
-        this.userRepository = userRepository;
+        this.scoringService = scoringService;
     }
 
     public List<Boolean> validateGuesses(List<String> imageUrls, List<Boolean> guesses) {
@@ -76,7 +76,10 @@ public class GameSessionService {
         if (currentBatch > game.getBatchCount()) {
 
             // update user points only and end the game
-            finalizeGameAndUpdateUserPoints(game);
+            scoringService.updateUserPoints(game);
+
+            game.setFinished(true);
+            gameRepository.save(game);
 
             return List.of(); // empty batch <=> game finished
         }
@@ -92,24 +95,5 @@ public class GameSessionService {
         return imageGames.stream()
                 .map(ig -> ig.getImage().getFilename())
                 .toList();
-    }
-
-    public void finalizeGameAndUpdateUserPoints(Game game) {
-        List<ImageGame> imageGames = imageGameRepository.findByGame(game);
-
-        long correctGuesses = imageGames.stream()
-                .filter(ImageGame::isUserGuessedCorrectly)
-                .count();
-
-        User user = userRepository.findById(game.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        user.setScore(user.getScore() + (int) correctGuesses);
-        userRepository.save(user);
-
-        System.out.println("User got " + correctGuesses + " correct guesses");
-
-        game.setFinished(true);
-        gameRepository.save(game);
     }
 }
