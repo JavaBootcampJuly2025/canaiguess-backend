@@ -1,22 +1,19 @@
 version: '3.8'
 
 services:
-  db:
-    image: postgres:15
-    container_name: canaiguess-db
+  app:
+    build: .
+    container_name: canaiguess-app
+    env_file:
+      - .env
     environment:
-      POSTGRES_DB: canaiguess
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+      - "8080:8080"
     networks:
       - canaiguess-net
 
 networks:
   canaiguess-net:
-
-volumes:
-  pgdata:
