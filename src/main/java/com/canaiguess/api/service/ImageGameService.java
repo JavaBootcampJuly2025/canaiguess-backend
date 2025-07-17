@@ -41,8 +41,14 @@ public class ImageGameService {
         // unplayed images for this user
         List<Image> unplayed = imageRepository.findUnplayedImagesByUser(game.getUserId());
 
-        // rank by distance to target difficulty
-        List<Image> sortedByDifficulty = unplayed.stream()
+        // fresh images (never played by anyone)
+        List<Image> neverPlayedByAnyone = unplayed.stream()
+                .filter(img -> img.getTotal() == 0)
+                .toList();
+
+        // played ones (played by at least someone),
+        // ranked by distance to target difficulty
+        List<Image> playedByOthers = unplayed.stream()
                 .filter(img -> img.getTotal() > 0)
                 .sorted((a, b) -> {
                     double da = 1.0 - (a.getCorrect() / (double) a.getTotal());
@@ -51,17 +57,27 @@ public class ImageGameService {
                 })
                 .toList();
 
+        // these will be allocated for the game;
         // as many as we can from unplayed pool
-        List<Image> selected = sortedByDifficulty.stream()
-                .limit(totalNeeded)
-                .collect(Collectors.toList());
+        List<Image> selected = neverPlayedByAnyone.stream()
+                .limit(totalNeeded).collect(Collectors.toList());
 
-        // if not enough, fill with previously played
+        // if not enough, fill with ones played by someone,
+        // by difficulty sorted images
+        if (selected.size() < totalNeeded) {
+            int remaining = totalNeeded - selected.size();
+            selected.addAll(playedByOthers.stream()
+                    .limit(remaining)
+                    .toList());
+        }
+
+        // if still not enough, look through all images,
+        // also previously played by the user
         if (selected.size() < totalNeeded) {
             List<Image> allImages = imageRepository.findAll();
-            allImages.removeAll(selected); // avoid duplicates
+            allImages.removeAll(selected);
 
-            List<Image> remaining = allImages.stream()
+            List<Image> previouslyPlayed = allImages.stream()
                     .filter(img -> img.getTotal() > 0)
                     .sorted((a, b) -> {
                         double da = 1.0 - (a.getCorrect() / (double) a.getTotal());
@@ -71,17 +87,7 @@ public class ImageGameService {
                     .limit(totalNeeded - selected.size())
                     .toList();
 
-            selected.addAll(remaining);
-        }
-
-        // if still not enough, take also images played by no one
-        if (selected.size() < totalNeeded) {
-            List<Image> all = imageRepository.findAll();
-            all.removeAll(selected);
-            Collections.shuffle(all);
-            selected.addAll(all.stream()
-                    .limit(totalNeeded - selected.size())
-                    .toList());
+            selected.addAll(previouslyPlayed);
         }
 
         // Defensive check
