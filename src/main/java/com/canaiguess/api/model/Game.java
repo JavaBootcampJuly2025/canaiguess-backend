@@ -11,10 +11,8 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class Game {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
-
-    private String gameMode;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private int batchCount;
 
@@ -22,7 +20,7 @@ public class Game {
 
     private int difficulty;
 
-    private String userId;
+    private Long userId;
 
     private int currentBatch;
 

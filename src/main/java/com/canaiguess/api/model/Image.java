@@ -16,10 +16,10 @@ public class Image {
 
     private String filename;
 
-    private boolean image_type; // true = ai, false = real
+    private boolean fake; // true = ai, false = real
 
-    private int total_guesses;
+    private int total; // total guesses
 
-    private int correct_guesses;
+    private int correct; // correct guesses
 
 }
