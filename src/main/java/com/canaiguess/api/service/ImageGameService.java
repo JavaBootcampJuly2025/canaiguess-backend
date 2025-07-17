@@ -85,7 +85,7 @@ public class ImageGameService {
         Collections.shuffle(selected);
         int index = 0;
 
-        for (int batch = 0; batch < game.getBatchCount(); batch++) {
+        for (int batch = 1; batch < game.getBatchCount(); batch++) {
             for (int i = 0; i < game.getBatchSize(); i++) {
                 Image image = selected.get(index++);
                 ImageGame ig = new ImageGame();
