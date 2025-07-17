@@ -31,16 +31,10 @@ public class GameController {
 
     // TODO: check authorization as only logged in users may resume a game
     @GetMapping("/{gameId}")
-<<<<<<< HEAD
-    public ResponseEntity<GameDTO> getGameById(@PathVariable String gameId) {
-        GameDTO game = gameService.getGameById(gameId);
-=======
     public ResponseEntity<GameInfoResponseDTO> getGameById(@PathVariable String gameId) {
         GameInfoResponseDTO game = gameService.getGameById(gameId);
->>>>>>> cd0b1f7426cbe376b04b68191f4a3b3e2dd36553
         if (game != null) {
             return ResponseEntity.ok(game);
-
         } else {
             return ResponseEntity.notFound().build();
         }

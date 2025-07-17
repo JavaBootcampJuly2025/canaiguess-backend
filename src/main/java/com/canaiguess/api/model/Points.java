@@ -1,4 +1,4 @@
-package com.canaiguess.api;
+package com.canaiguess.api.model;
 
 
 

@@ -1,5 +1,6 @@
 package com.canaiguess.api;
 
-public class LeaderboardControllerTest {
+public class LeaderboardControllerTest
+{
     
 }
