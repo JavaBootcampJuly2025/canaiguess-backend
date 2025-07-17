@@ -39,7 +39,7 @@ public class AuthenticationController {
             description = "Validates user credentials and returns a JWT token."
     )
     public ResponseEntity<AuthenticationResponse> authenticate(
-            @RequestBody AuthenticationRequest request
+            @RequestBody @Valid AuthenticationRequest request
     ) {
         return ResponseEntity.ok(service.authenticate(request));
     }

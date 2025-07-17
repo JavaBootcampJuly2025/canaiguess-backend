@@ -23,8 +23,8 @@ public class RegisterRequest {
     @NotBlank(message = "Password is mandatory")
     @Size(min = 8, message = "Minimum password length is 8 characters")
     @Pattern(
-            regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}$",
-            message = "Minimum eight characters, at least one letter and one number"
+            regexp = "^(?=.*[A-Za-z])(?=.*\\d).+$",
+            message = "Password requires at least one letter and one number"
     )
     private String password;
 }
