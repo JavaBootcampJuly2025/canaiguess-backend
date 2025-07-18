@@ -28,9 +28,9 @@ The frontend for canaiguess is built with **React** and **Vite**:
 
 ---
 
-Database logical model:
+Database logic model:
 
-<img width="744" height="386" alt="attels" src="https://github.com/user-attachments/assets/e0064cbd-64be-4a02-addd-730138dfea0b" />
+<img width="1434" height="956" alt="attels" src="https://github.com/user-attachments/assets/87d49fab-e36c-45d3-8c1e-09dc41faf086" />
 
 App flowchart schema:
 
@@ -64,31 +64,29 @@ Data from the game could be valuable for researchers working on human-AI percept
 
 ## API Endpoints
 
-### Authentication
+You can view and interact with the API using Swagger UI:
+```
+http://localhost:8080/swagger-ui/index.html
+```
 
-- **POST** `/api/v1/auth/register`  
-  Register a new user and receive a JWT.
+<img width="653" height="552" alt="attels" src="https://github.com/user-attachments/assets/23653b43-c5ea-44a8-859e-4e543a5fecba" />
 
-- **POST** `/api/v1/auth/authenticate`  
-  Authenticate and receive a JWT.
+RegisterRequest: username, email, password
 
-### Game
+AuthenticationResponse: token
 
-- **POST** `/api/game`  
-  Create a new game for the authenticated user.
+NewGameRequestDTO: batchCount, batchSize, difficulty
 
-- **GET** `/api/game/{gameId}`  
-  Get details of a specific game.
+GameResultsDTO: correct, incorrect, accuracy, score
 
-- **POST** `/api/game/{gameId}/batch`  
-  Get the next image batch for a game.
+GuessRequestDTO: guesses: boolean[]
 
-- **POST** `/api/game/{gameId}/results`  
-  Get the result (correct/incorrect) stats for a game.
+GuessResultDTO: correct: boolean[]
 
-### Guess
+ImageBatchResponseDTO: images: string[]
 
-- **POST** `/api/guess`  
-  Validate image guesses; returns which were correct.
+LeaderboardDTO: username, score
+
+GameInfoResponseDTO: batchCount, batchSize, currentBatch, difficulty
 
 <!-- END API DOCS -->
