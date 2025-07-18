@@ -9,7 +9,6 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GuessRequestDTO {
-    private Long gameId;
     private List<Boolean> guesses;
 }
 

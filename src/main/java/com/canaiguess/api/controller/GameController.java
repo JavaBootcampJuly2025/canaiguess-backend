@@ -68,6 +68,17 @@ public class GameController {
         return ResponseEntity.ok(new ImageBatchResponseDTO(imageUrls));
     }
 
+    @PostMapping("/{gameId}/guess")
+    @Operation(summary = "Submit guesses for the current batch")
+    public ResponseEntity<GuessResultDTO> validateGuesses(
+            @PathVariable Long gameId,
+            @RequestBody GuessRequestDTO guessRequest,
+            @AuthenticationPrincipal User user
+    ) {
+        List<Boolean> results = gameSessionService.validateGuesses(gameId, user, guessRequest.getGuesses());
+        return ResponseEntity.ok(new GuessResultDTO(results));
+    }
+
     @PostMapping("/{gameId}/results")
     @Operation(
             summary = "Get results for a game",
