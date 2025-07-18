@@ -9,7 +9,7 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GuessRequestDTO {
-    private List<String> images;
+    private Long gameId;
     private List<Boolean> guesses;
 }
 
