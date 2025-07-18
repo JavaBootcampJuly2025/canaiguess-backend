@@ -29,11 +29,9 @@ public class ScoringService {
                 .filter(ImageGame::isUserGuessedCorrectly)
                 .count();
 
-//        double batchSizeEffect = 1 + (1 - Math.exp((double) -game.getBatchSize() / 5)); // 1 to 2 (softmax)
-//        double difficultyEffect = game.getDifficulty() / 100.0; // 0 to 1 (proportional)
-//        int score = (int) Math.round(correct * difficultyEffect * batchSizeEffect * 10); // 0 to [batchSize * batchCount * 20]
-
-        int score = 10;
+        double batchSizeEffect = 1 + (1 - Math.exp((double) -game.getBatchSize() / 5)); // 1 to 2 (softmax)
+        double difficultyEffect = game.getDifficulty() / 100.0; // 0 to 1 (proportional)
+        int score = (int) Math.round(correct * difficultyEffect * batchSizeEffect * 10); // 0 to [batchSize * batchCount * 20]
 
         user.setScore(user.getScore() + score);
         userRepository.save(user);
