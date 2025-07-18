@@ -30,7 +30,7 @@ public class ImageAllocatorService {
         double targetDifficulty = game.getDifficulty() / 100.0; // assume 0-100 input
 
         // unplayed images for this user
-        List<Image> unplayed = imageRepository.findUnplayedImagesByUser(game.getUserId());
+        List<Image> unplayed = imageRepository.findUnplayedImagesByUser(game.getUser());
 
         // fresh images (never played by anyone)
         List<Image> neverPlayedByAnyone = unplayed.stream()

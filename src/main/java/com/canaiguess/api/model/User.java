@@ -24,15 +24,22 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(unique = true,  nullable = false)
     private String username;
+
     @Column(unique = true,  nullable = false)
     private String email;
     private String password;
+
     @Column(nullable = false)
     private Integer score = 0;
+
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToMany(mappedBy = "user")
+    private List<Game> games;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

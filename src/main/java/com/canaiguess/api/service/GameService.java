@@ -6,6 +6,7 @@ import com.canaiguess.api.dto.NewGameRequestDTO;
 import com.canaiguess.api.dto.NewGameResponseDTO;
 import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.ImageGame;
+import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.GameRepository;
 import com.canaiguess.api.repository.ImageGameRepository;
 import org.springframework.stereotype.Service;
@@ -27,11 +28,11 @@ public class GameService {
         this.gameRepository = gameRepository;
     }
 
-    public NewGameResponseDTO createGame(NewGameRequestDTO request, long userId) {
+    public NewGameResponseDTO createGame(NewGameRequestDTO request, User user) {
         Game game = new Game();
         game.setBatchCount(request.getBatchCount());
         game.setDifficulty(request.getDifficulty());
-        game.setUserId(userId);
+        game.setUser(user);
         game.setBatchSize(request.getBatchSize());
         game.setCurrentBatch(1);
 
@@ -55,29 +56,22 @@ public class GameService {
             .orElse(null);
     }
 
-    public GameResultsDTO getGameResults(Long gameId, Long userId) {
+    public GameResultsDTO getGameResults(Long gameId, User user) {
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new RuntimeException("Game not found"));
 
-        if (!game.getUserId().equals(userId)) {
+        if (!game.getUser().getId().equals(user.getId())) {
             throw new RuntimeException("Unauthorized access to game results");
         }
 
         List<ImageGame> imageGames = imageGameRepository.findByGame(game);
 
-        int correct = 0;
+        int correct = (int) imageGames.stream().filter(ImageGame::isUserGuessedCorrectly).count();
         int total = imageGames.size();
-
-        for (ImageGame ig : imageGames) {
-            if (ig.isUserGuessedCorrectly()) {
-                correct++;
-            }
-        }
-
         int incorrect = total - correct;
         double accuracy = total > 0 ? (double) correct / total : 0.0;
 
-        return new GameResultsDTO(correct, incorrect, accuracy);
+        return new GameResultsDTO(correct, incorrect, accuracy, game.getScore());
     }
 
 

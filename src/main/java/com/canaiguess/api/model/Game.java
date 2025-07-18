@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -20,10 +22,19 @@ public class Game {
 
     private int difficulty;
 
-    private Long userId;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     private int currentBatch;
 
     private boolean finished; // derived from batches and currentBatch
+
+    @OneToMany(mappedBy = "game")
+    private List<ImageGame> imageGames;
+
+    @Column(nullable = false)
+    private int score = 0;
+
 
 }

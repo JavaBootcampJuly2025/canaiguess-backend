@@ -4,6 +4,7 @@ import com.canaiguess.api.dto.AuthenticationRequest;
 import com.canaiguess.api.dto.AuthenticationResponse;
 import com.canaiguess.api.dto.RegisterRequest;
 import com.canaiguess.api.enums.Role;
+import com.canaiguess.api.exception.DuplicateResourceException;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,14 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(RegisterRequest request) {
+
+        if (repository.findByUsername(request.getUsername()).isPresent()) {
+            throw new DuplicateResourceException("Username is already in use");
+        }
+        if (repository.findByEmail(request.getEmail()).isPresent()) {
+            throw new DuplicateResourceException("Email is already in use");
+        }
+
         var user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())

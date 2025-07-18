@@ -5,7 +5,6 @@ import com.canaiguess.api.model.ImageGame;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.ImageGameRepository;
 import com.canaiguess.api.repository.UserRepository;
-import com.canaiguess.api.repository.GameRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,16 +16,14 @@ public class ScoringService {
     private final UserRepository userRepository;
 
     public ScoringService(ImageGameRepository imageGameRepository,
-                          UserRepository userRepository,
-                          GameRepository gameRepository) {
+                          UserRepository userRepository) {
         this.imageGameRepository = imageGameRepository;
         this.userRepository = userRepository;
     }
 
     public void updateUserPoints(Game game) {
         List<ImageGame> imageGames = imageGameRepository.findByGame(game);
-        User user = userRepository.findById(game.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = game.getUser();
 
         int correct = (int) imageGames.stream()
                 .filter(ImageGame::isUserGuessedCorrectly)
@@ -37,6 +34,8 @@ public class ScoringService {
         int score = (int) Math.round(correct * difficultyEffect * batchSizeEffect * 10); // 0 to [batchSize * batchCount * 20]
 
         user.setScore(user.getScore() + score);
+        game.setScore(score);
+
         userRepository.save(user);
     }
 }

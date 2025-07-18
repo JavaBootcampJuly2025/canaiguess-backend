@@ -35,8 +35,7 @@ public class GameController {
             @AuthenticationPrincipal User user
     ) {
 
-        long userId = (user != null) ? user.getId() : null;
-        NewGameResponseDTO response = gameService.createGame(request, userId);
+        NewGameResponseDTO response = gameService.createGame(request, user);
         return ResponseEntity.ok(response);
 
     }
@@ -65,8 +64,19 @@ public class GameController {
             @PathVariable Long gameId,
             @AuthenticationPrincipal User user
     ) {
-        List<String> imageUrls = gameSessionService.getNextBatchForGame(gameId, user.getId());
+        List<String> imageUrls = gameSessionService.getNextBatchForGame(gameId, user);
         return ResponseEntity.ok(new ImageBatchResponseDTO(imageUrls));
+    }
+
+    @PostMapping("/{gameId}/guess")
+    @Operation(summary = "Submit guesses for the current batch")
+    public ResponseEntity<GuessResultDTO> validateGuesses(
+            @PathVariable Long gameId,
+            @RequestBody GuessRequestDTO guessRequest,
+            @AuthenticationPrincipal User user
+    ) {
+        List<Boolean> results = gameSessionService.validateGuesses(gameId, user, guessRequest.getGuesses());
+        return ResponseEntity.ok(new GuessResultDTO(results));
     }
 
     @PostMapping("/{gameId}/results")
@@ -78,7 +88,7 @@ public class GameController {
             @PathVariable Long gameId,
             @AuthenticationPrincipal User user
     ) {
-        GameResultsDTO results = gameService.getGameResults(gameId, user.getId());
+        GameResultsDTO results = gameService.getGameResults(gameId, user);
         return ResponseEntity.ok(results);
     }
 

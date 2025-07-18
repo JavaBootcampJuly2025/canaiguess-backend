@@ -9,7 +9,6 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GuessRequestDTO {
-    private List<String> images;
     private List<Boolean> guesses;
 }
 

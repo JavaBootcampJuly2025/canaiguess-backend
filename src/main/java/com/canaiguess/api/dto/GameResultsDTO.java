@@ -9,4 +9,6 @@ public class GameResultsDTO {
     private int correct;
     private int incorrect;
     private double accuracy;
+    private int score;
+
 }
