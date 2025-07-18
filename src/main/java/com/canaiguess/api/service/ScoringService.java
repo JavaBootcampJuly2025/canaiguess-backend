@@ -5,7 +5,6 @@ import com.canaiguess.api.model.ImageGame;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.ImageGameRepository;
 import com.canaiguess.api.repository.UserRepository;
-import com.canaiguess.api.repository.GameRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,8 +16,7 @@ public class ScoringService {
     private final UserRepository userRepository;
 
     public ScoringService(ImageGameRepository imageGameRepository,
-                          UserRepository userRepository,
-                          GameRepository gameRepository) {
+                          UserRepository userRepository) {
         this.imageGameRepository = imageGameRepository;
         this.userRepository = userRepository;
     }

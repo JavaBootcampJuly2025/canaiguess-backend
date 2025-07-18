@@ -40,7 +40,7 @@ public class GameSessionService {
             throw new RuntimeException("Unauthorized access to game");
         }
 
-        int batch = game.getCurrentBatch() - 1; // because we incremented after sending
+        int batch = game.getCurrentBatch();
 
         List<ImageGame> imageGames = imageGameRepository.findByGameAndBatchNumber(game, batch);
 
@@ -70,12 +70,15 @@ public class GameSessionService {
             imageGameRepository.save(ig);
         }
 
-        // final batch check
+        game.setCurrentBatch(batch + 1);
+
+        // if this was the final batch, finish and score
         if (batch == game.getBatchCount()) {
             scoringService.updateUserPoints(game);
             game.setFinished(true);
-            gameRepository.save(game);
         }
+
+        gameRepository.save(game);
 
         return correct;
     }
@@ -99,9 +102,6 @@ public class GameSessionService {
         if (imageGames.isEmpty()) {
             throw new RuntimeException("No images found for current batch");
         }
-
-        game.setCurrentBatch(currentBatch + 1);
-        gameRepository.save(game);
 
         return imageGames.stream()
                 .map(ig -> ig.getImage().getFilename())
