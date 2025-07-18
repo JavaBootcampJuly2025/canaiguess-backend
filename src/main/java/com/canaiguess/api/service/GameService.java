@@ -71,7 +71,7 @@ public class GameService {
         int incorrect = total - correct;
         double accuracy = total > 0 ? (double) correct / total : 0.0;
 
-        return new GameResultsDTO(correct, incorrect, accuracy);
+        return new GameResultsDTO(correct, incorrect, accuracy, game.getScore());
     }
 
 

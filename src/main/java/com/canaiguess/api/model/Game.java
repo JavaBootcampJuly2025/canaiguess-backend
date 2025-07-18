@@ -33,4 +33,8 @@ public class Game {
     @OneToMany(mappedBy = "game")
     private List<ImageGame> imageGames;
 
+    @Column(nullable = false)
+    private int score = 0;
+
+
 }

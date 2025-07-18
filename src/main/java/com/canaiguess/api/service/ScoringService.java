@@ -34,6 +34,8 @@ public class ScoringService {
         int score = (int) Math.round(correct * difficultyEffect * batchSizeEffect * 10); // 0 to [batchSize * batchCount * 20]
 
         user.setScore(user.getScore() + score);
+        game.setScore(score);
+
         userRepository.save(user);
     }
 }

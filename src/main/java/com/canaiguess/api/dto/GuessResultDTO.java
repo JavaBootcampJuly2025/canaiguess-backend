@@ -10,5 +10,6 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class GuessResultDTO {
     private List<Boolean> correct;
+
 }
 
