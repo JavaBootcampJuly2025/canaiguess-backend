@@ -25,8 +25,7 @@ public class ScoringService {
 
     public void updateUserPoints(Game game) {
         List<ImageGame> imageGames = imageGameRepository.findByGame(game);
-        User user = userRepository.findById(game.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = game.getUser();
 
         int correct = (int) imageGames.stream()
                 .filter(ImageGame::isUserGuessedCorrectly)
