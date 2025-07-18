@@ -5,6 +5,7 @@ import com.canaiguess.api.model.ImageGame;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.ImageGameRepository;
 import com.canaiguess.api.repository.UserRepository;
+import com.canaiguess.api.repository.GameRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,11 +15,14 @@ public class ScoringService {
 
     private final ImageGameRepository imageGameRepository;
     private final UserRepository userRepository;
+    private final GameRepository gameRepository;
 
     public ScoringService(ImageGameRepository imageGameRepository,
-                          UserRepository userRepository) {
+                          UserRepository userRepository,
+                          GameRepository gameRepository) {
         this.imageGameRepository = imageGameRepository;
         this.userRepository = userRepository;
+        this.gameRepository = gameRepository;
     }
 
     public void updateUserPoints(Game game) {
@@ -31,11 +35,14 @@ public class ScoringService {
 
         double batchSizeEffect = 1 + (1 - Math.exp((double) -game.getBatchSize() / 5)); // 1 to 2 (softmax)
         double difficultyEffect = game.getDifficulty() / 100.0; // 0 to 1 (proportional)
-        int score = (int) Math.round(correct * difficultyEffect * batchSizeEffect * 10); // 0 to [batchSize * batchCount * 20]
+        int score = (int) Math.round(correct * difficultyEffect * batchSizeEffect * 10);
 
+        // Add to user's total score
         user.setScore(user.getScore() + score);
-        game.setScore(score);
-
         userRepository.save(user);
+
+        // Save points to the each Game entity
+        game.setPointsEarned(score);
+        gameRepository.save(game);
     }
 }
