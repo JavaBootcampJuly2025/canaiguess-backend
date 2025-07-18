@@ -22,7 +22,7 @@ public class GameHistoryService {
     public List<GameSummaryDTO> getLast10Games(User user) {
         List<Game> games = gameRepository.findByUserIdOrderByCreatedAtDesc(user, PageRequest.of(0, 10));
         return games.stream()
-                .map(g -> new GameSummaryDTO(g.getId(), g.getPointsEarned()))
+                .map(g -> new GameSummaryDTO(g.getId(), g.getScore()))
                 .collect(Collectors.toList());
     }
 }

@@ -24,15 +24,16 @@ public class Game {
 
     private int difficulty;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
     private int currentBatch;
 
     private boolean finished; // derived from batches and currentBatch
 
-    private int pointsEarned; // needed for last 10 user games
-
-    private int score;
+    @Column(nullable = false)
+    private int score = 0; // needed for last 10 user games
 
     @CreationTimestamp
     private LocalDateTime createdAt; // needed for last 10 user games

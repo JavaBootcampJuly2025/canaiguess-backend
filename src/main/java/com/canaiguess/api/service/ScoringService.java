@@ -41,8 +41,8 @@ public class ScoringService {
         user.setScore(user.getScore() + score);
         userRepository.save(user);
 
-        // Save points to the each Game entity
-        game.setPointsEarned(score);
+        // Save points to the Game entity
+        game.setScore(score);
         gameRepository.save(game);
     }
 }

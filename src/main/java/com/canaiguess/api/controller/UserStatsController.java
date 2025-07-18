@@ -22,7 +22,7 @@ public class UserStatsController {
     public List<LastGameDTO> getLastGames(@PathVariable User user) {
         List<Game> games = gameRepository.findByUserIdOrderByCreatedAtDesc(user, PageRequest.of(0, 10));
         return games.stream()
-                .map(game -> new LastGameDTO(game.getId(), game.getPointsEarned(), game.getCreatedAt()))
+                .map(game -> new LastGameDTO(game.getId(), game.getScore(), game.getCreatedAt()))
                 .collect(Collectors.toList());
     }
 }
