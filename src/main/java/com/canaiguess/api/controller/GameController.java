@@ -64,8 +64,8 @@ public class GameController {
             @PathVariable Long gameId,
             @AuthenticationPrincipal User user
     ) {
-        List<String> imageUrls = gameSessionService.getNextBatchForGame(gameId, user);
-        return ResponseEntity.ok(new ImageBatchResponseDTO(imageUrls));
+        List<ImageDTO> images = gameSessionService.getNextBatchForGame(gameId, user);
+        return ResponseEntity.ok(new ImageBatchResponseDTO(images));
     }
 
     @PostMapping("/{gameId}/guess")
