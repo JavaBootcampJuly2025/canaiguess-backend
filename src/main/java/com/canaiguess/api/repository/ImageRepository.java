@@ -22,10 +22,11 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     @Query("""
         SELECT i FROM Image i
         WHERE i.total > 0
-        AND NOT EXISTS (
-            SELECT 1 FROM ImageGame ig
-            WHERE ig.image = i AND ig.game.user = :user
-        )
+        AND i.id NOT IN (
+             SELECT ig.image.id
+             FROM ImageGame ig
+             WHERE ig.game.user = :user
+       )
         ORDER BY ABS((1.0 - (i.correct * 1.0 / i.total)) - :targetDifficulty)
     """)
     List<Image> findPlayedByOthersSortedByDifficulty(
@@ -38,10 +39,11 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     @Query("""
         SELECT i FROM Image i
         WHERE i.total > 0
-        AND EXISTS (
-            SELECT 1 FROM ImageGame ig
-            WHERE ig.image = i AND ig.game.user = :user
-        )
+        AND i.id IN (
+             SELECT ig.image.id
+             FROM ImageGame ig
+             WHERE ig.game.user = :user
+       )
         ORDER BY ABS((1.0 - (i.correct * 1.0 / i.total)) - :targetDifficulty)
     """)
     List<Image> findPlayedByUserSortedByDifficulty(
