@@ -9,5 +9,5 @@ import java.util.List;
 
 public interface GameRepository extends JpaRepository<Game, Long> {
 
-    List<Game> findByUserIdOrderByCreatedAtDesc(User user, Pageable pageable);
+    List<Game> findByUserIdOrderByCreatedAtDesc(long userId, Pageable pageable);
 }

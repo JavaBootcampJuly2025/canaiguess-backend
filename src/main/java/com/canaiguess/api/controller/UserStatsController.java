@@ -6,6 +6,7 @@ import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.GameRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,8 +20,8 @@ public class UserStatsController {
     private GameRepository gameRepository;
 
     @GetMapping("/last-games/{userId}")
-    public List<LastGameDTO> getLastGames(@PathVariable User user) {
-        List<Game> games = gameRepository.findByUserIdOrderByCreatedAtDesc(user, PageRequest.of(0, 10));
+    public List<LastGameDTO> getLastGames(@AuthenticationPrincipal User user) {
+        List<Game> games = gameRepository.findByUserIdOrderByCreatedAtDesc(user.getId(), PageRequest.of(0, 10));
         return games.stream()
                 .map(game -> new LastGameDTO(game.getId(), game.getScore(), game.getCreatedAt()))
                 .collect(Collectors.toList());
