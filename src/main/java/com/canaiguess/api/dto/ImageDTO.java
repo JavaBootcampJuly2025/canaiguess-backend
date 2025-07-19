@@ -1,13 +1,14 @@
 package com.canaiguess.api.dto;
 
-import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ImageBatchResponseDTO {
-    private List<ImageDTO> images;
+public class ImageDTO {
+    private long id;
+    private String url;
 }
+
