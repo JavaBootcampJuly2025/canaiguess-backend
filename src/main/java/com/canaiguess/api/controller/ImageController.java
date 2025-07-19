@@ -12,33 +12,32 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/ai")
-@Tag(name = "AI Analysis", description = "Use Gemini to analyze images and answer prompts")
-public class GeminiController {
+@RequestMapping("/image")
+@Tag(name = "Image", description = "Image operations including AI analysis")
+public class ImageController {
 
     private final GeminiService geminiService;
     private final ImageRepository imageRepository;
 
-    public GeminiController(GeminiService geminiService, ImageRepository imageRepository) {
+    public ImageController(GeminiService geminiService, ImageRepository imageRepository) {
         this.geminiService = geminiService;
         this.imageRepository = imageRepository;
     }
 
     @Operation(
-            summary = "Analyze image with Gemini",
-            description = "Takes an image ID and a prompt, runs it through Gemini vision model, and returns a response"
+            summary = "Get a hint for an image",
+            description = "Analyzes the given image using Gemini and returns a response to the user's prompt."
     )
-    @PostMapping("/hint")
-    public ResponseEntity<String> analyze(
+    @PostMapping("/{imageId}/hint")
+    public ResponseEntity<String> getHint(
+            @PathVariable Long imageId,
             @RequestBody PromptRequestDTO request,
-            @AuthenticationPrincipal User user) {
-        Image image = imageRepository.findById(request.getImageId())
+            @AuthenticationPrincipal User user
+    ) {
+        Image image = imageRepository.findById(imageId)
                 .orElseThrow(() -> new RuntimeException("Image not found"));
 
-        String imageUrl = image.getFilename();
-        String prompt = request.getPrompt();
-
-        String result = geminiService.analyzeImagePrompt(imageUrl, prompt);
+        String result = geminiService.analyzeImagePrompt(image.getFilename(), request.getPrompt());
         return ResponseEntity.ok(result);
     }
 }

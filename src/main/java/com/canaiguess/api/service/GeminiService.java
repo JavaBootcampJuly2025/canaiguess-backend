@@ -19,18 +19,20 @@ public class GeminiService {
 
     @PostConstruct
     public void init() {
-        this.client = new Client(); // GEMINI_API_KEY is picked from env
+        this.client = new Client(); // GEMINI_API_KEY picked from env
     }
 
     public String analyzeImagePrompt(String imageUrl, String prompt) {
         try {
+            byte[] imageBytes = fetchBytesFromUrl(imageUrl);
+
             Content input = Content.fromParts(
                     Part.fromText(prompt),
-                    Part.fromUri(imageUrl, "image/jpeg")
+                    Part.fromBytes(imageBytes, "image/jpeg")
             );
 
             GenerateContentResponse resp = client.models
-                    .generateContent("gemini-2.5-pro-vision", input, null);
+                    .generateContent("gemini-1.5-flash", input, null);
 
             return resp.text();
         } catch (Exception e) {
@@ -45,4 +47,3 @@ public class GeminiService {
                 .body();
     }
 }
-
