@@ -50,4 +50,45 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
             Pageable pageable
     );
 
+    // fresh real or fake
+    @Query("SELECT i FROM Image i WHERE i.total = 0 AND i.fake = :isFake")
+    List<Image> findFreshByFakeness(@Param("isFake") boolean isFake, Pageable pageable);
+
+    // played by others, sorted by difficulty
+    @Query("""
+        SELECT i FROM Image i
+        WHERE i.total > 0 AND i.fake = :isFake
+        AND NOT EXISTS (
+            SELECT 1 FROM ImageGame ig
+            JOIN ig.game g
+            WHERE ig.image = i AND g.user = :user
+        )
+        ORDER BY ABS((1.0 - (i.correct * 1.0 / i.total)) - :targetDifficulty)
+    """)
+    List<Image> findPlayedByOthersByFakeness(
+            @Param("user") User user,
+            @Param("targetDifficulty") double targetDifficulty,
+            @Param("isFake") boolean isFake,
+            Pageable pageable
+    );
+
+    // played by user
+    @Query("""
+        SELECT i FROM Image i
+        WHERE i.total > 0 AND i.fake = :isFake
+        AND EXISTS (
+            SELECT 1 FROM ImageGame ig
+            JOIN ig.game g
+            WHERE ig.image = i AND g.user = :user
+        )
+        ORDER BY ABS((1.0 - (i.correct * 1.0 / i.total)) - :targetDifficulty)
+    """)
+    List<Image> findPlayedByUserByFakeness(
+            @Param("user") User user,
+            @Param("targetDifficulty") double targetDifficulty,
+            @Param("isFake") boolean isFake,
+            Pageable pageable
+    );
+
+
 }

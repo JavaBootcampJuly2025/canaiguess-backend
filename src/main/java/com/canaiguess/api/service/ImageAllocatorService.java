@@ -84,6 +84,57 @@ public class ImageAllocatorService {
     }
 
     public void allocateTwoImageBatch(Game game) {
-        // TODO
+        int batchCount = game.getBatchCount();
+        double targetDifficulty = game.getDifficulty() / 100.0;
+
+        // Try to fetch fresh real/fake first
+        List<Image> realImages = new ArrayList<>(imageRepository.findFreshByFakeness(false, PageRequest.of(0, batchCount)));
+        List<Image> fakeImages = new ArrayList<>(imageRepository.findFreshByFakeness(true, PageRequest.of(0, batchCount)));
+
+        // Played by others if not enough
+        if (realImages.size() < batchCount) {
+            int needed = batchCount - realImages.size();
+            realImages.addAll(imageRepository.findPlayedByOthersByFakeness(
+                    game.getUser(), targetDifficulty, false, PageRequest.of(0, needed)));
+        }
+        if (fakeImages.size() < batchCount) {
+            int needed = batchCount - fakeImages.size();
+            fakeImages.addAll(imageRepository.findPlayedByOthersByFakeness(
+                    game.getUser(), targetDifficulty, true, PageRequest.of(0, needed)));
+        }
+
+        // Played by user if still not enough
+        if (realImages.size() < batchCount) {
+            int needed = batchCount - realImages.size();
+            realImages.addAll(imageRepository.findPlayedByUserByFakeness(
+                    game.getUser(), targetDifficulty, false, PageRequest.of(0, needed)));
+        }
+        if (fakeImages.size() < batchCount) {
+            int needed = batchCount - fakeImages.size();
+            fakeImages.addAll(imageRepository.findPlayedByUserByFakeness(
+                    game.getUser(), targetDifficulty, true, PageRequest.of(0, needed)));
+        }
+
+        if (realImages.size() < batchCount || fakeImages.size() < batchCount) {
+            throw new IllegalStateException("Not enough real/fake images to create a 2-image batch game");
+        }
+
+        Collections.shuffle(realImages);
+        Collections.shuffle(fakeImages);
+
+        for (int batch = 1; batch <= batchCount; batch++) {
+            ImageGame ig1 = new ImageGame();
+            ig1.setGame(game);
+            ig1.setImage(realImages.get(batch - 1));
+            ig1.setBatchNumber(batch);
+            imageGameRepository.save(ig1);
+
+            ImageGame ig2 = new ImageGame();
+            ig2.setGame(game);
+            ig2.setImage(fakeImages.get(batch - 1));
+            ig2.setBatchNumber(batch);
+            imageGameRepository.save(ig2);
+        }
     }
+
 }
