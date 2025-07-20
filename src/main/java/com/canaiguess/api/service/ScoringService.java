@@ -33,10 +33,6 @@ public class ScoringService {
                 .filter(ImageGame::isUserGuessedCorrectly)
                 .count();
 
-        int guesses = imageGames.size();
-        user.setTotalGuesses(user.getTotalGuesses() + guesses);
-        user.setCorrectGuesses(user.getCorrectGuesses() + correct);
-
         double batchSizeEffect = 1 + (1 - Math.exp((double) -game.getBatchSize() / 5)); // 1 to 2 (softmax)
         double difficultyEffect = game.getDifficulty() / 100.0; // 0 to 1 (proportional)
         int score = (int) Math.round(correct * difficultyEffect * batchSizeEffect * 10);

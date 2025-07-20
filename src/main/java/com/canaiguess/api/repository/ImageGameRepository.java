@@ -12,4 +12,6 @@ public interface ImageGameRepository extends JpaRepository<ImageGame, Long> {
 
     // Get images for a specific batch of a game
     List<ImageGame> findByGameAndBatchNumber(Game game, int batchNumber);
+
+    List<ImageGame> findByGameUserId(Long userId);
 }
