@@ -35,12 +35,6 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Integer score = 0;
 
-    @Column(nullable = false)
-    private Integer totalGuesses = 0; // needed for accuracy leaderboard
-
-    @Column(nullable = false)
-    private Integer correctGuesses = 0; // needed for accuracy leaderboard
-
     @Enumerated(EnumType.STRING)
     private Role role;
 

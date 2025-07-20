@@ -1,44 +1,51 @@
 package com.canaiguess.api.service;
 
-import com.canaiguess.api.dto.AccuracyLeaderboardDTO;
 import com.canaiguess.api.dto.LeaderboardDTO;
+import com.canaiguess.api.model.ImageGame;
 import com.canaiguess.api.model.User;
+import com.canaiguess.api.repository.ImageGameRepository;
 import com.canaiguess.api.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
-public class LeaderboardService
-{
+public class LeaderboardService {
 
     private final UserRepository userRepository;
+    private final ImageGameRepository imageGameRepository;
 
-    public LeaderboardService(UserRepository userRepository)
-    {
+    public LeaderboardService(UserRepository userRepository, ImageGameRepository imageGameRepository) {
         this.userRepository = userRepository;
+        this.imageGameRepository = imageGameRepository;
     }
 
-    public List<LeaderboardDTO> getLeaderboard()
-    {
+    // ✅ 1) Points leaderboard
+    public List<LeaderboardDTO> getLeaderboard() {
         List<User> topUsers = userRepository.findTop10ByOrderByScoreDesc();
         return topUsers.stream()
-                .map(user -> new LeaderboardDTO(user.getUsername(), user.getScore()))
-                .collect(Collectors.toList());
+                .map(user -> new LeaderboardDTO(user.getUsername(), user.getScore(), null)) // accuracy null
+                .toList();
     }
 
-    public List<AccuracyLeaderboardDTO> getAccuracyLeaderboard() {
-    List<User> allUsers = userRepository.findAll();
+    // ✅ 2) Accuracy leaderboard
+    public List<LeaderboardDTO> getAccuracyLeaderboard() {
+        List<User> allUsers = userRepository.findAll();
 
-    return allUsers.stream()
-        .filter(user -> user.getTotalGuesses() > 0) // skip people with no games
-        .map(user -> {
-            double accuracy = (double) user.getCorrectGuesses() / user.getTotalGuesses() * 100.0;
-            return new AccuracyLeaderboardDTO(user.getUsername(), accuracy);
-        })
-        .sorted((u1, u2) -> Double.compare(u2.getAccuracy(), u1.getAccuracy())) // highest first
-        .limit(10)
-        .toList();
+        return allUsers.stream()
+                .map(user -> {
+                    List<ImageGame> userImageGames = imageGameRepository.findByGameUserId(user.getId());
+                    long total = userImageGames.size();
+                    long correct = userImageGames.stream()
+                            .filter(ImageGame::isUserGuessedCorrectly)
+                            .count();
+                    double accuracy = total > 0 ? ((double) correct / total) * 100.0 : 0.0;
+
+                    return new LeaderboardDTO(user.getUsername(), 0, accuracy); // score zero
+                })
+                .filter(dto -> dto.getAccuracy() > 0)
+                .sorted((u1, u2) -> Double.compare(u2.getAccuracy(), u1.getAccuracy()))
+                .limit(10)
+                .toList();
     }
 }

@@ -5,8 +5,8 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class LeaderboardDTO
-{
+public class LeaderboardDTO {
     private String username;
-    private int score;
+    private int score;         // for points leaderboard
+    private Double accuracy;   // for accuracy leaderboard
 }
