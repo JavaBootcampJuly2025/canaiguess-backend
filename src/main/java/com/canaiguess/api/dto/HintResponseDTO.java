@@ -4,10 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PromptRequestDTO {
-    private String imageUrl;
-    private String prompt; // "Is this real or AI-generated?"
+public class HintResponseDTO {
+    private boolean fake;
+    private List<String> signs;
 }
