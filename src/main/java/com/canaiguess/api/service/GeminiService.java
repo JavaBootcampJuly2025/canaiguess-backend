@@ -42,7 +42,7 @@ public class GeminiService {
 
             Content input = Content.fromParts(
                     Part.fromText("""
-                    Analyze the image. Is it AI-generated? If yes, give 2-5 brief visual clues or signs. Be factual. Return a JSON response like:
+                    Analyze the image. Is it AI-generated? Give 2-5 brief visual clues or signs. Be factual. Return a JSON response like:
                     {
                       "fake": true|false,
                       "signs": ["reason 1", "reason 2", ...]
