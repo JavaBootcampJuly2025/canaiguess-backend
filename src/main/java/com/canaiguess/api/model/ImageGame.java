@@ -1,9 +1,6 @@
 package com.canaiguess.api.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,13 +18,15 @@ public class ImageGame {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "game_id", nullable = false)
     private Game game;
 
     @ManyToOne
+    @JoinColumn(name = "image_id", nullable = false)
     private Image image;
 
     private int batchNumber;
 
-    private boolean userGuessedCorrectly; // to track user specific results (for drill down)
+    private boolean userGuessedCorrectly; // to track user-specific results
 
 }

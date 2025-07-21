@@ -1,13 +1,17 @@
 package com.canaiguess.api.repository;
 
 import com.canaiguess.api.model.Game;
-import com.canaiguess.api.model.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface GameRepository extends JpaRepository<Game, Long> {
 
-    List<Game> findByUserIdOrderByCreatedAtDesc(User user, Pageable pageable);
+    List<Game> findByUserIdOrderByCreatedAtDesc(long userId, Pageable pageable);
+
+    Optional<Game> findByPublicId(String publicId);
+
+    boolean existsByPublicId(String publicId);
 }

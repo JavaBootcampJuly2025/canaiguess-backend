@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 public class LastGameDTO {
-    private Long id;
+    private String id;
     private int pointsEarned;
     private LocalDateTime createdAt;
 }

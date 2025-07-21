@@ -1,4 +1,4 @@
-name: Java CI with Maven
+name: Java CI with Maven & Docker Publish
 
 on:
   push:
@@ -7,8 +7,12 @@ on:
     branches: [ "main", "develop" ]
 
 jobs:
-  build:
+  build-and-publish:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write  # Required to push to GHCR
 
     env:
       DB_URL: ${{ secrets.DB_URL }}
@@ -16,7 +20,11 @@ jobs:
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set lowercase repo name
+        run: echo "REPO_NAME=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -26,7 +34,24 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        run: mvn -B package --file pom.xml
+        run: mvn -B package --file pom.xml -DskipTests
 
       - name: Run Tests
         run: mvn test
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ env.REPO_NAME }}/canaiguess:latest
+            ghcr.io/${{ env.REPO_NAME }}/canaiguess:${{ github.sha }}

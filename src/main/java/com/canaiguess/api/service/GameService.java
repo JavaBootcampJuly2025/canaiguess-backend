@@ -9,6 +9,7 @@ import com.canaiguess.api.model.ImageGame;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.GameRepository;
 import com.canaiguess.api.repository.ImageGameRepository;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,34 +31,45 @@ public class GameService {
 
     public NewGameResponseDTO createGame(NewGameRequestDTO request, User user) {
         Game game = new Game();
+
         game.setBatchCount(request.getBatchCount());
         game.setDifficulty(request.getDifficulty());
-        game.setUser(user);
         game.setBatchSize(request.getBatchSize());
         game.setCurrentBatch(1);
 
+        // null for unauthorized games
+        game.setUser(user);
+
+        // ensure a unique public id is generated
+        String publicId;
+        do {
+            publicId = RandomStringUtils.randomAlphanumeric(8).toLowerCase();
+        } while (gameRepository.existsByPublicId(publicId));
+
+        game.setPublicId(publicId);
+
+        // populate with id and timestamp fields
         Game saved = gameRepository.save(game);
 
-        // Delegate image allocation
+        // delegate image allocation
         imageAllocatorService.allocateImagesForGame(saved);
 
-        return new NewGameResponseDTO(saved.getId());
+        return new NewGameResponseDTO(saved.getPublicId());
     }
 
-    public GameInfoResponseDTO getGameById(Long gameId) {
-        return gameRepository.findById(gameId)
-            .map(game -> GameInfoResponseDTO.builder()
-                    .batchCount(game.getBatchCount())
-                    .batchSize(game.getBatchSize())
-                    .currentBatch(game.getCurrentBatch())
-                    .difficulty(game.getDifficulty())
-                    .build()
-            )
-            .orElse(null);
+    public GameInfoResponseDTO getGameByPublicId(String gameId) {
+        return gameRepository.findByPublicId(gameId)
+                .map(game -> GameInfoResponseDTO.builder()
+                        .batchCount(game.getBatchCount())
+                        .batchSize(game.getBatchSize())
+                        .currentBatch(game.getCurrentBatch())
+                        .difficulty(game.getDifficulty())
+                        .build())
+                .orElse(null);
     }
 
-    public GameResultsDTO getGameResults(Long gameId, User user) {
-        Game game = gameRepository.findById(gameId)
+    public GameResultsDTO getGameResults(String gameId, User user) {
+        Game game = gameRepository.findByPublicId(gameId)
                 .orElseThrow(() -> new RuntimeException("Game not found"));
 
         if (!game.getUser().getId().equals(user.getId())) {
@@ -73,6 +85,5 @@ public class GameService {
 
         return new GameResultsDTO(correct, incorrect, accuracy, game.getScore());
     }
-
 
 }

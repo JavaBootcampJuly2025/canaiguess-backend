@@ -1,5 +1,6 @@
 package com.canaiguess.api.controller;
 
+import com.canaiguess.api.annotation.CanAccessGame;
 import com.canaiguess.api.dto.*;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.service.GameService;
@@ -12,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
-// @AuthenticationPrincipal possible
 @RestController
 @RequestMapping("/api/game")
 @Tag(name = "Game", description = "Handles game creation, retrieval, and image batch fetching")
@@ -20,16 +20,14 @@ public class GameController {
 
     private final GameService gameService;
     private final GameSessionService gameSessionService;
+
     public GameController(GameService gameService, GameSessionService gameSessionService) {
         this.gameSessionService = gameSessionService;
         this.gameService = gameService;
     }
 
     @PostMapping
-    @Operation(
-            summary = "Create a new game",
-            description = "Creates a new game for the authenticated user"
-    )
+    @Operation(summary = "Create a new game")
     public ResponseEntity<NewGameResponseDTO> createGame(
             @RequestBody NewGameRequestDTO request,
             @AuthenticationPrincipal User user
@@ -40,14 +38,11 @@ public class GameController {
 
     }
 
-    // TODO: check authorization as only logged in users may resume a game
+    @CanAccessGame
     @GetMapping("/{gameId}")
-    @Operation(
-            summary = "Get game by ID",
-            description = "Returns game details by ID if it exists"
-    )
-    public ResponseEntity<GameInfoResponseDTO> getGameById(@PathVariable Long gameId) {
-        GameInfoResponseDTO game = gameService.getGameById(gameId);
+    @Operation(summary = "Get game details by ID")
+    public ResponseEntity<GameInfoResponseDTO> getGameById(@PathVariable String gameId) {
+        GameInfoResponseDTO game = gameService.getGameByPublicId(gameId);
         if (game != null) {
             return ResponseEntity.ok(game);
         } else {
@@ -55,23 +50,22 @@ public class GameController {
         }
     }
 
+    @CanAccessGame
     @PostMapping("/{gameId}/batch")
-    @Operation(
-            summary = "Fetch next image batch",
-            description = "Returns the next set of image URLs for a game"
-    )
+    @Operation(summary = "Fetch next image batch")
     public ResponseEntity<ImageBatchResponseDTO> getNextBatch(
-            @PathVariable Long gameId,
+            @PathVariable String gameId,
             @AuthenticationPrincipal User user
     ) {
         List<ImageDTO> images = gameSessionService.getNextBatchForGame(gameId, user);
         return ResponseEntity.ok(new ImageBatchResponseDTO(images));
     }
 
+    @CanAccessGame
     @PostMapping("/{gameId}/guess")
     @Operation(summary = "Submit guesses for the current batch")
     public ResponseEntity<GuessResultDTO> validateGuesses(
-            @PathVariable Long gameId,
+            @PathVariable String gameId,
             @RequestBody GuessRequestDTO guessRequest,
             @AuthenticationPrincipal User user
     ) {
@@ -79,19 +73,18 @@ public class GameController {
         return ResponseEntity.ok(new GuessResultDTO(results));
     }
 
+    @CanAccessGame
     @PostMapping("/{gameId}/results")
     @Operation(
             summary = "Get results for a game",
             description = "Returns the number of correct and incorrect guesses for the game"
     )
     public ResponseEntity<GameResultsDTO> getGameResults(
-            @PathVariable Long gameId,
+            @PathVariable String gameId,
             @AuthenticationPrincipal User user
     ) {
         GameResultsDTO results = gameService.getGameResults(gameId, user);
         return ResponseEntity.ok(results);
     }
-
-
 
 }
