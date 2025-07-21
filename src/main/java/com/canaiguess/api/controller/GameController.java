@@ -40,10 +40,7 @@ public class GameController {
 
     @CanAccessGame
     @GetMapping("/{gameId}")
-    @Operation(
-            summary = "Get game by ID",
-            description = "Returns game details by ID if it exists"
-    )
+    @Operation(summary = "Get game details by ID")
     public ResponseEntity<GameInfoResponseDTO> getGameById(@PathVariable Long gameId) {
         GameInfoResponseDTO game = gameService.getGameById(gameId);
         if (game != null) {
@@ -55,10 +52,7 @@ public class GameController {
 
     @CanAccessGame
     @PostMapping("/{gameId}/batch")
-    @Operation(
-            summary = "Fetch next image batch",
-            description = "Returns the next set of image URLs for a game"
-    )
+    @Operation(summary = "Fetch next image batch")
     public ResponseEntity<ImageBatchResponseDTO> getNextBatch(
             @PathVariable Long gameId,
             @AuthenticationPrincipal User user
