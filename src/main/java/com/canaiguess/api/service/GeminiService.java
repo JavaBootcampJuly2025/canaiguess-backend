@@ -1,11 +1,14 @@
 package com.canaiguess.api.service;
 
 import com.canaiguess.api.dto.HintResponseDTO;
+import com.canaiguess.api.model.ModelGuess;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.genai.Client;
 import com.google.genai.types.Content;
 import com.google.genai.types.GenerateContentResponse;
 import com.google.genai.types.Part;
+import jakarta.transaction.Transactional;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 
@@ -18,7 +21,13 @@ import java.util.Objects;
 
 @Service
 public class GeminiService {
+
+    private final ModelGuessService modelGuessService;
     private Client client;
+
+    public GeminiService(ModelGuessService modelGuessService) {
+        this.modelGuessService = modelGuessService;
+    }
 
     @PostConstruct
     public void init() {
@@ -46,7 +55,12 @@ public class GeminiService {
 
             String json = extractJsonFromMarkdown(Objects.requireNonNull(resp.text()));
             ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(json, HintResponseDTO.class);
+            HintResponseDTO dto = mapper.readValue(json, HintResponseDTO.class);
+
+            // Store asynchronously
+            modelGuessService.storeModelGuessAsync(imageUrl, dto);
+
+            return dto;
 
         } catch (Exception e) {
             throw new RuntimeException("Failed to analyze image with Gemini: " + e.getMessage(), e);
