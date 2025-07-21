@@ -9,11 +9,13 @@ import com.google.genai.types.Part;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 
+import javax.naming.ServiceUnavailableException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -41,8 +43,34 @@ public class GeminiService {
                     Part.fromBytes(imageBytes, "image/jpeg")
             );
 
-            GenerateContentResponse resp = client.models
-                    .generateContent("gemini-1.5-flash", input, null);
+
+            List<String> models = List.of(
+                    "gemini-2.5-flash-lite-preview-06-17",
+                    "gemini-2.5-flash",
+                    "gemini-2.0-flash-lite",
+                    "gemini-2.0-flash",
+                    "gemini-2.5-flash-preview-tts",
+                    "gemini-2.5-pro-preview-tts"
+            );
+
+            GenerateContentResponse resp = null;
+            Exception lastError = null;
+
+            for (String model : models) {
+                try {
+                    resp = client.models.generateContent(model, input, null);
+                    if (resp != null) {
+                        break; // success
+                    }
+                } catch (Exception e) {
+                    lastError = e;
+                    System.err.println("Model " + model + " failed: " + e.getMessage());
+                }
+            }
+
+            if (resp == null) {
+                throw new RuntimeException("All Gemini models failed", lastError);
+            }
 
             String json = extractJsonFromMarkdown(Objects.requireNonNull(resp.text()));
             ObjectMapper mapper = new ObjectMapper();
