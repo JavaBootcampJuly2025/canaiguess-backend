@@ -96,6 +96,4 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
 
 
     Optional<Image> findByPublicId(String publicId);
-
-    boolean existsByPublicId(String publicId);
 }
