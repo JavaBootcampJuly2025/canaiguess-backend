@@ -30,13 +30,13 @@ public class ImageController {
     )
     @PostMapping("/{imageId}/hint")
     public ResponseEntity<HintResponseDTO> getHint(
-            @PathVariable Long imageId,
+            @PathVariable String imageId,
             @AuthenticationPrincipal User user
     ) {
-        Image image = imageRepository.findById(imageId)
+        Image image = imageRepository.findByPublicId(imageId)
                 .orElseThrow(() -> new RuntimeException("Image not found"));
 
-        HintResponseDTO result = geminiService.analyzeImagePrompt(image.getFilename());
+        HintResponseDTO result = geminiService.analyzeImagePrompt(image.getUrl());
         return ResponseEntity.ok(result);
     }
 }

@@ -41,8 +41,8 @@ public class GameController {
     @CanAccessGame
     @GetMapping("/{gameId}")
     @Operation(summary = "Get game details by ID")
-    public ResponseEntity<GameInfoResponseDTO> getGameById(@PathVariable Long gameId) {
-        GameInfoResponseDTO game = gameService.getGameById(gameId);
+    public ResponseEntity<GameInfoResponseDTO> getGameById(@PathVariable String gameId) {
+        GameInfoResponseDTO game = gameService.getGameByPublicId(gameId);
         if (game != null) {
             return ResponseEntity.ok(game);
         } else {
@@ -54,7 +54,7 @@ public class GameController {
     @PostMapping("/{gameId}/batch")
     @Operation(summary = "Fetch next image batch")
     public ResponseEntity<ImageBatchResponseDTO> getNextBatch(
-            @PathVariable Long gameId,
+            @PathVariable String gameId,
             @AuthenticationPrincipal User user
     ) {
         List<ImageDTO> images = gameSessionService.getNextBatchForGame(gameId, user);
@@ -65,7 +65,7 @@ public class GameController {
     @PostMapping("/{gameId}/guess")
     @Operation(summary = "Submit guesses for the current batch")
     public ResponseEntity<GuessResultDTO> validateGuesses(
-            @PathVariable Long gameId,
+            @PathVariable String gameId,
             @RequestBody GuessRequestDTO guessRequest,
             @AuthenticationPrincipal User user
     ) {
@@ -80,13 +80,11 @@ public class GameController {
             description = "Returns the number of correct and incorrect guesses for the game"
     )
     public ResponseEntity<GameResultsDTO> getGameResults(
-            @PathVariable Long gameId,
+            @PathVariable String gameId,
             @AuthenticationPrincipal User user
     ) {
         GameResultsDTO results = gameService.getGameResults(gameId, user);
         return ResponseEntity.ok(results);
     }
-
-
 
 }

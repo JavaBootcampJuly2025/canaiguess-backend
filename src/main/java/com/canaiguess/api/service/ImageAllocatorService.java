@@ -19,8 +19,7 @@ public class ImageAllocatorService {
     private final ImageGameRepository imageGameRepository;
 
     public ImageAllocatorService(ImageRepository imageRepository,
-                            ImageGameRepository imageGameRepository
-                            ) {
+                            ImageGameRepository imageGameRepository) {
 
         this.imageRepository = imageRepository;
         this.imageGameRepository = imageGameRepository;

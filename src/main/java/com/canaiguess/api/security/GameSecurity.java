@@ -15,13 +15,14 @@ public class GameSecurity {
         this.gameRepository = gameRepository;
     }
 
-    public boolean isOwner(Long gameId, Authentication authentication) {
-        Game game = gameRepository.findById(gameId).orElse(null);
+    public boolean isOwner(String gameId, Authentication authentication) {
+        Game game = gameRepository.findByPublicId(gameId).orElse(null);
         if (game == null) return false;
 
         if (game.getUser() == null) {
             // requests with no authentication can access anonymous games,
             // although it is not checked weather it is the same anonymous user
+            // but as the public id is unguessable, attacks shouldn't occur
             return authentication == null;
         }
 
