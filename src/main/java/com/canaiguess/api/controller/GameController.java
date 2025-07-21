@@ -1,5 +1,6 @@
 package com.canaiguess.api.controller;
 
+import com.canaiguess.api.annotation.CanAccessGame;
 import com.canaiguess.api.dto.*;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.service.GameService;
@@ -12,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
-// @AuthenticationPrincipal possible
 @RestController
 @RequestMapping("/api/game")
 @Tag(name = "Game", description = "Handles game creation, retrieval, and image batch fetching")
@@ -20,16 +20,14 @@ public class GameController {
 
     private final GameService gameService;
     private final GameSessionService gameSessionService;
+
     public GameController(GameService gameService, GameSessionService gameSessionService) {
         this.gameSessionService = gameSessionService;
         this.gameService = gameService;
     }
 
     @PostMapping
-    @Operation(
-            summary = "Create a new game",
-            description = "Creates a new game for the authenticated user"
-    )
+    @Operation(summary = "Create a new game")
     public ResponseEntity<NewGameResponseDTO> createGame(
             @RequestBody NewGameRequestDTO request,
             @AuthenticationPrincipal User user
@@ -40,7 +38,7 @@ public class GameController {
 
     }
 
-    // TODO: check authorization as only logged in users may resume a game
+    @CanAccessGame
     @GetMapping("/{gameId}")
     @Operation(
             summary = "Get game by ID",
@@ -55,6 +53,7 @@ public class GameController {
         }
     }
 
+    @CanAccessGame
     @PostMapping("/{gameId}/batch")
     @Operation(
             summary = "Fetch next image batch",
@@ -68,6 +67,7 @@ public class GameController {
         return ResponseEntity.ok(new ImageBatchResponseDTO(images));
     }
 
+    @CanAccessGame
     @PostMapping("/{gameId}/guess")
     @Operation(summary = "Submit guesses for the current batch")
     public ResponseEntity<GuessResultDTO> validateGuesses(
@@ -79,6 +79,7 @@ public class GameController {
         return ResponseEntity.ok(new GuessResultDTO(results));
     }
 
+    @CanAccessGame
     @PostMapping("/{gameId}/results")
     @Operation(
             summary = "Get results for a game",

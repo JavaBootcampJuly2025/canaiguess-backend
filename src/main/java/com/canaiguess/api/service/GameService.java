@@ -30,15 +30,19 @@ public class GameService {
 
     public NewGameResponseDTO createGame(NewGameRequestDTO request, User user) {
         Game game = new Game();
+
         game.setBatchCount(request.getBatchCount());
         game.setDifficulty(request.getDifficulty());
-        game.setUser(user);
         game.setBatchSize(request.getBatchSize());
         game.setCurrentBatch(1);
 
+        // null for unauthorized games
+        game.setUser(user);
+
+        // populate with id and timestamp fields
         Game saved = gameRepository.save(game);
 
-        // Delegate image allocation
+        // delegate image allocation
         imageAllocatorService.allocateImagesForGame(saved);
 
         return new NewGameResponseDTO(saved.getId());
