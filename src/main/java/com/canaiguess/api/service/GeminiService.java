@@ -1,5 +1,7 @@
 package com.canaiguess.api.service;
 
+import com.canaiguess.api.dto.HintResponseDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.genai.Client;
 import com.google.genai.types.Content;
 import com.google.genai.types.GenerateContentResponse;
@@ -12,6 +14,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Objects;
 
 @Service
 public class GeminiService {
@@ -22,19 +25,29 @@ public class GeminiService {
         this.client = new Client(); // GEMINI_API_KEY picked from env
     }
 
-    public String analyzeImagePrompt(String imageUrl, String prompt) {
+    public HintResponseDTO analyzeImagePrompt(String imageUrl) {
         try {
             byte[] imageBytes = fetchBytesFromUrl(imageUrl);
 
             Content input = Content.fromParts(
-                    Part.fromText(prompt),
+                    Part.fromText("""
+                    Analyze the image. Is it AI-generated? If yes, give 2-5 brief visual clues or signs. Be factual. Return a JSON response like:
+                    {
+                      "fake": true|false,
+                      "signs": ["reason 1", "reason 2", ...]
+                    }
+                    Only include 2–5 short (each about 20 words sentences) visual signs or clues.
+                    """),
                     Part.fromBytes(imageBytes, "image/jpeg")
             );
 
             GenerateContentResponse resp = client.models
                     .generateContent("gemini-1.5-flash", input, null);
 
-            return resp.text();
+            String json = extractJsonFromMarkdown(Objects.requireNonNull(resp.text()));
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(json, HintResponseDTO.class);
+
         } catch (Exception e) {
             throw new RuntimeException("Failed to analyze image with Gemini: " + e.getMessage(), e);
         }
@@ -46,4 +59,16 @@ public class GeminiService {
                 .send(req, HttpResponse.BodyHandlers.ofByteArray())
                 .body();
     }
+
+    private String extractJsonFromMarkdown(String text) {
+        if (text.startsWith("```")) {
+            int start = text.indexOf("{");
+            int end = text.lastIndexOf("}");
+            if (start != -1 && end != -1 && end > start) {
+                return text.substring(start, end + 1).trim();
+            }
+        }
+        return text.trim();
+    }
+
 }
