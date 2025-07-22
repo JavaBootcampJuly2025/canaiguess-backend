@@ -5,18 +5,17 @@ canaiguess is a backend for an interactive game where players try to determine:
 
 Players can try different game modes:
 1. Single image: Guess if it’s real or AI
-2. Pair: Which is AI? (one real, one fake)
+2. Pair: Which is which? (one real, one fake)
 3. Multiple images: Which ones are AI?
 
 Leaderboards for signed-in users keep things competitive and fun!
+Users can also get hints for any inage with the help of Gemini API.
 
 ---
 
 ## **Frontend Project**
 
-The frontend for canaiguess is built with **React** and **Vite**:  
-👉 [canaiguess-frontend repository](https://github.com/JavaBootcampJuly2025/canaiguess-frontend)  
-(Stack: React, Vite)
+The frontend for canaiguess is built with **React** and **Vite** is in [canaiguess-frontend repository](https://github.com/JavaBootcampJuly2025/canaiguess-frontend)  
 
 ---
 
@@ -28,17 +27,19 @@ The frontend for canaiguess is built with **React** and **Vite**:
 
 ---
 
-Database logical model:
+Database logic model:
 
-<img width="744" height="386" alt="attels" src="https://github.com/user-attachments/assets/e0064cbd-64be-4a02-addd-730138dfea0b" />
+<img src="https://github.com/user-attachments/assets/87d49fab-e36c-45d3-8c1e-09dc41faf086" />
 
 App flowchart schema:
 
-<img width="1180" height="465" alt="attels" src="https://github.com/user-attachments/assets/211fff08-5cf4-4fb0-9a70-552ebc0ca02b" />
+<img src="https://github.com/user-attachments/assets/211fff08-5cf4-4fb0-9a70-552ebc0ca02b" />
 
 ## Dataset
 
-We use public datasets to provide real and AI-generated images.
+We use [this](https://www.kaggle.com/datasets/tristanzhang32/ai-generated-images-vs-real-images?select=test) public dataset from Kaggle to provide real and AI-generated images. 
+- Image Storage: Cloudflare R2
+- Database Hosting: Supabase
 
 ## **Potential Features**
 
@@ -58,37 +59,66 @@ Data from the game could be valuable for researchers working on human-AI percept
 
 ## **Game Security**
 
-- CAPTCHA test at the beginning for unauthorized users
+- CAPTCHA for unauthenticated users
+- JWT-based authentication
+
+## Running the Backend with Docker
+
+### Step 1: Authenticate with GitHub Container Registry
+```
+echo YOUR_GITHUB_PAT | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
+```
+
+### Step 2: Pull the Image
+```
+docker pull ghcr.io/javabootcampjuly2025/canaiguess-backend/canaiguess:<IMAGE_TAG>
+```
+
+*Replace <IMAGE_TAG> with the specific version.*
+  
+### Step 3: Create a .env File
+
+Create a .env file in the same directory where you’ll run Docker. Contact any team member for required .env fields.
+```
+DB_URL=
+DB_USERNAME=
+DB_PASSWORD=
+JWT_SECRET=
+GOOGLE_API_KEY=
+```
+
+### Step 4: Run the Container
+```
+docker run --env-file .env -p 8080:8080 ghcr.io/javabootcampjuly2025/canaiguess-backend/canaiguess:<IMAGE_TAG>
+```
 
 <!-- START API DOCS -->
 
 ## API Endpoints
 
-### Authentication
+You can view and interact with the API using Swagger UI:
+```
+http://localhost:8080/swagger-ui/index.html
+```
 
-- **POST** `/api/v1/auth/register`  
-  Register a new user and receive a JWT.
+<img width="653" height="552" alt="attels" src="https://github.com/user-attachments/assets/23653b43-c5ea-44a8-859e-4e543a5fecba" />
 
-- **POST** `/api/v1/auth/authenticate`  
-  Authenticate and receive a JWT.
+RegisterRequest: username, email, password
 
-### Game
+AuthenticationResponse: token
 
-- **POST** `/api/game`  
-  Create a new game for the authenticated user.
+NewGameRequestDTO: batchCount, batchSize, difficulty
 
-- **GET** `/api/game/{gameId}`  
-  Get details of a specific game.
+GameResultsDTO: correct, incorrect, accuracy, score
 
-- **POST** `/api/game/{gameId}/batch`  
-  Get the next image batch for a game.
+GuessRequestDTO: guesses: boolean[]
 
-- **POST** `/api/game/{gameId}/results`  
-  Get the result (correct/incorrect) stats for a game.
+GuessResultDTO: correct: boolean[]
 
-### Guess
+ImageBatchResponseDTO: images: string[]
 
-- **POST** `/api/guess`  
-  Validate image guesses; returns which were correct.
+LeaderboardDTO: username, score
+
+GameInfoResponseDTO: batchCount, batchSize, currentBatch, difficulty
 
 <!-- END API DOCS -->
