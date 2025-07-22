@@ -1,12 +1,13 @@
 package com.canaiguess.api.controller;
 
-import com.canaiguess.api.annotation.CanAccessGame;
 import com.canaiguess.api.dto.*;
+import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.service.GameService;
 import com.canaiguess.api.service.GameSessionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
@@ -38,20 +39,18 @@ public class GameController {
 
     }
 
-    @CanAccessGame
+    @PreAuthorize("hasRole('ADMIN') or @gameSecurity.isOwner(#gameId, authentication)")
     @GetMapping("/{gameId}")
-    @Operation(summary = "Get game details by ID")
-    public ResponseEntity<GameInfoResponseDTO> getGameById(@PathVariable String gameId) {
-        GameInfoResponseDTO game = gameService.getGameByPublicId(gameId);
+    @Operation(summary = "Get full game info (metadata + results)")
+    public ResponseEntity<GameDTO> getGameById(
+            @PathVariable String gameId,
+            @AuthenticationPrincipal User user
+    ) {
+        GameDTO game = gameService.getGameByPublicId(gameId, user);
         return ResponseEntity.ok(game);
-//        if (game != null) {
-//            return ResponseEntity.ok(game);
-//        } else {
-//            return ResponseEntity.notFound().build();
-//        }
     }
 
-    @CanAccessGame
+    @PreAuthorize("hasRole('ADMIN') or @gameSecurity.isOwner(#gameId, authentication)")
     @PostMapping("/{gameId}/batch")
     @Operation(summary = "Fetch next image batch")
     public ResponseEntity<ImageBatchResponseDTO> getNextBatch(
@@ -62,7 +61,7 @@ public class GameController {
         return ResponseEntity.ok(new ImageBatchResponseDTO(images));
     }
 
-    @CanAccessGame
+    @PreAuthorize("hasRole('ADMIN') or @gameSecurity.isOwner(#gameId, authentication)")
     @PostMapping("/{gameId}/guess")
     @Operation(summary = "Submit guesses for the current batch")
     public ResponseEntity<GuessResultDTO> validateGuesses(
@@ -74,18 +73,7 @@ public class GameController {
         return ResponseEntity.ok(new GuessResultDTO(results));
     }
 
-    @CanAccessGame
-    @PostMapping("/{gameId}/results")
-    @Operation(
-            summary = "Get results for a game",
-            description = "Returns the number of correct and incorrect guesses for the game"
-    )
-    public ResponseEntity<GameResultsDTO> getGameResults(
-            @PathVariable String gameId,
-            @AuthenticationPrincipal User user
-    ) {
-        GameResultsDTO results = gameService.getGameResults(gameId, user);
-        return ResponseEntity.ok(results);
-    }
+
+
 
 }

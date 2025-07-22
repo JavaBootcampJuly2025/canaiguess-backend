@@ -35,11 +35,24 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Integer score = 0;
 
+    @Column(nullable = false)
+    private Integer totalGuesses = 0; // derived field
+
+    @Column(nullable = false)
+    private Integer correctGuesses = 0;  // derived field
+
     @Enumerated(EnumType.STRING)
     private Role role;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Game> games;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ImageReport> submittedReports;
+
+    @OneToMany(mappedBy = "reviewer", cascade = CascadeType.ALL)
+    private List<ImageReport> reviewedReports;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
