@@ -1,6 +1,6 @@
 package com.canaiguess.api.service;
 
-import com.canaiguess.api.dto.LeaderboardDTO;
+import com.canaiguess.api.dto.UserDTO;
 import com.canaiguess.api.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -15,13 +15,13 @@ public class LeaderboardService {
         this.userRepository = userRepository;
     }
 
-    public List<LeaderboardDTO> getLeaderboard() {
+    public List<UserDTO> getLeaderboard() {
         return userRepository.findAll().stream()
             .map(user -> {
                 double accuracy = user.getTotalGuesses() > 0
                     ? ((double) user.getCorrectGuesses() / user.getTotalGuesses()) * 100.0
                     : 0.0;
-                return new LeaderboardDTO(user.getUsername(), user.getScore(), accuracy);
+                return new UserDTO(user.getUsername(), user.getScore(), accuracy);
             })
             .sorted((u1, u2) -> Integer.compare(u2.getScore(), u1.getScore()))
             .limit(10)
