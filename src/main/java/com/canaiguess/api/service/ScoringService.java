@@ -36,9 +36,14 @@ public class ScoringService {
         gameRepository.save(game);
 
         // update score for User
-        user.setScore(user.getScore() + score);
-        user.setTotalGuesses(user.getTotalGuesses() + game.getTotalGuesses());
-        user.setCorrectGuesses(user.getCorrectGuesses() + correct);
+        int userScore = user.getScore() != null ? user.getScore() : 0;
+        int userTotal = user.getTotalGuesses() != null ? user.getTotalGuesses() : 0;
+        int userCorrect = user.getCorrectGuesses() != null ? user.getCorrectGuesses() : 0;
+
+        user.setScore(userScore + score);
+        user.setTotalGuesses(userTotal + (game.getTotalGuesses() != null ? game.getTotalGuesses() : 0));
+        user.setCorrectGuesses(userCorrect + correct);
+
         userRepository.save(user);
     }
 }
