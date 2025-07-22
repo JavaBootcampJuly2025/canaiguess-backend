@@ -29,6 +29,9 @@ public class Image {
     @OneToMany(mappedBy = "image", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ImageGame> imageGames;
 
+    @OneToMany(mappedBy = "image", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ImageReport> reports;
+
     @PrePersist
     public void ensurePublicId() {
         if (this.publicId == null) {

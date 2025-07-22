@@ -1,10 +1,12 @@
 package com.canaiguess.api.controller;
 
 import com.canaiguess.api.dto.HintResponseDTO;
+import com.canaiguess.api.dto.SubmitReportRequestDTO;
 import com.canaiguess.api.model.Image;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.ImageRepository;
 import com.canaiguess.api.service.GeminiService;
+import com.canaiguess.api.service.ImageReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +20,14 @@ public class ImageController {
 
     private final GeminiService geminiService;
     private final ImageRepository imageRepository;
+    private final ImageReportService imageReportService;
 
-    public ImageController(GeminiService geminiService, ImageRepository imageRepository) {
+    public ImageController(GeminiService geminiService,
+                           ImageRepository imageRepository,
+                           ImageReportService imageReportService) {
         this.geminiService = geminiService;
         this.imageRepository = imageRepository;
+        this.imageReportService = imageReportService;
     }
 
     @Operation(
@@ -38,5 +44,16 @@ public class ImageController {
 
         HintResponseDTO result = geminiService.analyzeImagePrompt(image.getUrl());
         return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/{imageId}/report")
+    public ResponseEntity<Void> reportImage(
+            @PathVariable String imageId,
+            @RequestBody SubmitReportRequestDTO request,
+            @AuthenticationPrincipal User user
+    ) {
+        imageReportService.submitReport(imageId, user, request.getDescription());
+        return ResponseEntity.noContent().build();
+
     }
 }

@@ -1,12 +1,12 @@
 package com.canaiguess.api.controller;
 
-import com.canaiguess.api.annotation.CanAccessGame;
 import com.canaiguess.api.dto.*;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.service.GameService;
 import com.canaiguess.api.service.GameSessionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +38,7 @@ public class GameController {
 
     }
 
-    @CanAccessGame
+    @PreAuthorize("hasRole('ADMIN') or @gameSecurity.isOwner(#gameId, authentication)")
     @GetMapping("/{gameId}")
     @Operation(summary = "Get game details by ID")
     public ResponseEntity<GameInfoResponseDTO> getGameById(@PathVariable String gameId) {
@@ -50,7 +50,7 @@ public class GameController {
         }
     }
 
-    @CanAccessGame
+    @PreAuthorize("hasRole('ADMIN') or @gameSecurity.isOwner(#gameId, authentication)")
     @PostMapping("/{gameId}/batch")
     @Operation(summary = "Fetch next image batch")
     public ResponseEntity<ImageBatchResponseDTO> getNextBatch(
@@ -61,7 +61,7 @@ public class GameController {
         return ResponseEntity.ok(new ImageBatchResponseDTO(images));
     }
 
-    @CanAccessGame
+    @PreAuthorize("hasRole('ADMIN') or @gameSecurity.isOwner(#gameId, authentication)")
     @PostMapping("/{gameId}/guess")
     @Operation(summary = "Submit guesses for the current batch")
     public ResponseEntity<GuessResultDTO> validateGuesses(
@@ -73,7 +73,7 @@ public class GameController {
         return ResponseEntity.ok(new GuessResultDTO(results));
     }
 
-    @CanAccessGame
+    @PreAuthorize("hasRole('ADMIN') or @gameSecurity.isOwner(#gameId, authentication)")
     @PostMapping("/{gameId}/results")
     @Operation(
             summary = "Get results for a game",
