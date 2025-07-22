@@ -19,8 +19,8 @@ public class LeaderboardService {
         return userRepository.findAll().stream()
             .map(user -> {
                 double accuracy = user.getTotalGuesses() > 0
-                        ? ((double) user.getCorrectGuesses() / user.getTotalGuesses()) * 100.0
-                        : 0.0;
+                    ? ((double) user.getCorrectGuesses() / user.getTotalGuesses()) * 100.0
+                    : 0.0;
                 return new LeaderboardDTO(user.getUsername(), user.getScore(), accuracy);
             })
             .sorted((u1, u2) -> Integer.compare(u2.getScore(), u1.getScore()))

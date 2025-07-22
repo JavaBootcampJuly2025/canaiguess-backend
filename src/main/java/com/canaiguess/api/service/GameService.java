@@ -80,23 +80,24 @@ public class GameService {
             throw new IllegalStateException("Game is not finished yet.");
         }
 
-        // async safety
         if (game.getScore() == null) {
             throw new IllegalStateException("Results are not ready yet.");
         }
 
         List<ImageGame> imageGames = imageGameRepository.findByGame(game);
-
-        int correct = (int) imageGames.stream()
-                .filter(ImageGame::isUserGuessedCorrectly)
-                .count();
-
+        int correct = (int) imageGames.stream().filter(ImageGame::isUserGuessedCorrectly).count();
         int total = imageGames.size();
         int incorrect = total - correct;
         double accuracy = total > 0 ? (double) correct / total : 0.0;
 
-        return new GameResultsDTO(correct, incorrect, accuracy, game.getScore());
+        return new GameResultsDTO(
+                game.getPublicId(),
+                correct,
+                incorrect,
+                accuracy,
+                game.getScore(),
+                game.getCreatedAt()
+        );
     }
-
 
 }
