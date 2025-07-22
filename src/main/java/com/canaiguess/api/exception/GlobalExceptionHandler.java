@@ -54,6 +54,30 @@ public class GlobalExceptionHandler {
                 );
     }
 
+    @ExceptionHandler(InvalidReportException.class)
+    public ResponseEntity<ExceptionResponse> handleException(InvalidReportException exp) {
+        return ResponseEntity
+                .status(NOT_FOUND)
+                .body(
+                        ExceptionResponse.builder()
+                                .businessErrorDescription("Invalid report data")
+                                .error(exp.getMessage())
+                                .build()
+                );
+    }
+
+    @ExceptionHandler(InvalidHintResponseException.class)
+    public ResponseEntity<ExceptionResponse> handleException(InvalidHintResponseException exp) {
+        return ResponseEntity
+                .status(NOT_FOUND)
+                .body(
+                        ExceptionResponse.builder()
+                                .businessErrorDescription("Invalid Hint response data")
+                                .error(exp.getMessage())
+                                .build()
+                );
+    }
+
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<ExceptionResponse> handleException(DuplicateResourceException exp) {
         return ResponseEntity

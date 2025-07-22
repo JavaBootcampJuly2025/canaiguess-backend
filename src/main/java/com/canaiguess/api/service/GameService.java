@@ -9,7 +9,6 @@ import com.canaiguess.api.exception.UnauthorizedAccessException;
 import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.GameRepository;
-import com.canaiguess.api.repository.ImageGameRepository;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 
@@ -63,10 +62,10 @@ public class GameService {
 
     public GameDTO getGameByPublicId(String gameId, User user) {
         Game game = gameRepository.findByPublicId(gameId)
-                .orElseThrow(() -> new RuntimeException("Game not found"));
+                .orElseThrow(() -> new GameDataIncompleteException("Game not found by gameId: " + gameId));
 
         if (game.getUser() != null && !game.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Unauthorized access to game details");
+            throw new UnauthorizedAccessException("Unauthorized access to game details");
         }
 
         return GameDTO.builder()
