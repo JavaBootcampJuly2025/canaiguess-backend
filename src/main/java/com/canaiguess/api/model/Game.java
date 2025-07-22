@@ -50,6 +50,17 @@ public class Game {
     @CreationTimestamp
     private LocalDateTime createdAt; // needed for last 10 user games
 
+    @Column(nullable = false)
+    private Integer totalGuesses = 0; // derived field
+
+    @Column(nullable = false)
+    private Integer correctGuesses = 0; // derived field
+
+    @Transient
+    public double getAccuracy() {
+        return totalGuesses > 0 ? ((double) correctGuesses / totalGuesses) * 100.0 : 0.0;
+    }
+
     @PrePersist
     public void ensurePublicId() {
         if (this.publicId == null) {
