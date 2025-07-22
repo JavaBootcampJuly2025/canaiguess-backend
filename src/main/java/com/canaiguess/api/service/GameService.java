@@ -4,10 +4,11 @@ import com.canaiguess.api.dto.GameDTO;
 
 import com.canaiguess.api.dto.NewGameRequestDTO;
 import com.canaiguess.api.dto.NewGameResponseDTO;
+import com.canaiguess.api.exception.GameDataIncompleteException;
+import com.canaiguess.api.exception.UnauthorizedAccessException;
 import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.GameRepository;
-import com.canaiguess.api.repository.ImageGameRepository;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,14 @@ public class GameService {
     }
 
     public NewGameResponseDTO createGame(NewGameRequestDTO request, User user) {
+
+        if (request.getBatchCount() <= 0 || request.getBatchSize() <= 0 || request.getDifficulty() < 0) {
+            throw new GameDataIncompleteException("Invalid game configuration values"
+                    + ". Batch count: " + request.getBatchCount()
+                    + ". Batch size: " + request.getBatchSize()
+                    + ". Difficulty: " + request.getDifficulty()
+            );
+        }
         Game game = new Game();
 
         game.setBatchCount(request.getBatchCount());
@@ -53,10 +62,10 @@ public class GameService {
 
     public GameDTO getGameByPublicId(String gameId, User user) {
         Game game = gameRepository.findByPublicId(gameId)
-                .orElseThrow(() -> new RuntimeException("Game not found"));
+                .orElseThrow(() -> new GameDataIncompleteException("Game not found by gameId: " + gameId));
 
         if (game.getUser() != null && !game.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Unauthorized access to game details");
+            throw new UnauthorizedAccessException("Unauthorized access to game details");
         }
 
         return GameDTO.builder()

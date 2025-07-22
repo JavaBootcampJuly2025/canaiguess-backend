@@ -1,12 +1,13 @@
 package com.canaiguess.api.service;
 
 import com.canaiguess.api.dto.ImageReportResponseDTO;
+import com.canaiguess.api.exception.GameDataIncompleteException;
+import com.canaiguess.api.exception.InvalidReportException;
 import com.canaiguess.api.model.Image;
 import com.canaiguess.api.model.ImageReport;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.ImageReportRepository;
 import com.canaiguess.api.repository.ImageRepository;
-import com.canaiguess.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,11 +19,11 @@ public class ImageReportService {
 
     private final ImageReportRepository imageReportRepository;
     private final ImageRepository imageRepository;
-    private final UserRepository userRepository;
 
     public void submitReport(String imageId, User user, String description) {
+
         Image image = imageRepository.findByPublicId(imageId)
-                .orElseThrow(() -> new IllegalArgumentException("Image not found"));
+                .orElseThrow(() -> new GameDataIncompleteException("Image not found with id: " + imageId));
 
         ImageReport report = new ImageReport();
         report.setImage(image);
@@ -49,7 +50,7 @@ public class ImageReportService {
 
     public void resolveReport(Long reportId, User reviewer) {
         ImageReport report = imageReportRepository.findById(reportId)
-                .orElseThrow(() -> new IllegalArgumentException("Report not found"));
+                .orElseThrow(() -> new InvalidReportException("Report not found"));
 
         report.setResolved(true);
         report.setReviewer(reviewer);

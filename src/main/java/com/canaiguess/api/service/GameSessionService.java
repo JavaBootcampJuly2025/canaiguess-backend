@@ -1,6 +1,8 @@
 package com.canaiguess.api.service;
 
 import com.canaiguess.api.dto.ImageDTO;
+import com.canaiguess.api.exception.GameDataIncompleteException;
+import com.canaiguess.api.exception.UnauthorizedAccessException;
 import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.Image;
 import com.canaiguess.api.model.ImageGame;
@@ -34,17 +36,20 @@ public class GameSessionService {
 
     public List<Boolean> validateGuesses(String gameId, User user, List<Boolean> guesses) {
         Game game = gameRepository.findByPublicId(gameId)
-                .orElseThrow(() -> new RuntimeException("Game not found"));
+                .orElseThrow(() -> new GameDataIncompleteException("Game not found by gameId: " + gameId));
 
         if (!game.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Unauthorized access to game");
+            throw new UnauthorizedAccessException("Unauthorized access to the game");
         }
 
         int batch = game.getCurrentBatch();
         List<ImageGame> imageGames = imageGameRepository.findByGameAndBatchNumber(game, batch);
 
+        if (guesses == null || guesses.isEmpty()) {
+            throw new GameDataIncompleteException("No guesses provided for validation.");
+        }
         if (imageGames.size() != guesses.size()) {
-            throw new RuntimeException("Mismatched guesses and images in batch");
+            throw new GameDataIncompleteException("Mismatched guesses and images in batch");
         }
 
         List<Boolean> correct = new ArrayList<>();
@@ -89,21 +94,21 @@ public class GameSessionService {
 
     public List<ImageDTO> getNextBatchForGame(String gameId, User user) {
         Game game = gameRepository.findByPublicId(gameId)
-                .orElseThrow(() -> new RuntimeException("Game not found"));
+                .orElseThrow(() -> new GameDataIncompleteException("Game not found by publicId: " + gameId));
 
         if (!game.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Unauthorized access to game");
+            throw new UnauthorizedAccessException("Unauthorized access to the game");
         }
 
         if (game.isFinished()) {
-            throw new RuntimeException("Game is already finished");
+            throw new GameDataIncompleteException("Game is already finished!");
         }
 
         int currentBatch = game.getCurrentBatch();
         List<ImageGame> imageGames = imageGameRepository.findByGameAndBatchNumber(game, currentBatch);
 
         if (imageGames.isEmpty()) {
-            throw new RuntimeException("No images found for current batch");
+            throw new GameDataIncompleteException("No images found for current batch");
         }
 
         return imageGames.stream()
