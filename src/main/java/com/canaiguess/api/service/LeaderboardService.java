@@ -18,13 +18,17 @@ public class LeaderboardService {
     public List<UserDTO> getLeaderboard() {
         return userRepository.findAll().stream()
             .map(user -> {
-                double accuracy = user.getTotalGuesses() > 0
-                    ? ((double) user.getCorrectGuesses() / user.getTotalGuesses()) * 100.0
-                    : 0.0;
+                int totalGuesses = user.getTotalGuesses() != null ? user.getTotalGuesses() : 0;
+                int correctGuesses = user.getCorrectGuesses() != null ? user.getCorrectGuesses() : 0;
+
+                double accuracy = totalGuesses > 0
+                        ? ((double) correctGuesses / totalGuesses) * 100.0
+                        : 0.0;
+
                 return new UserDTO(user.getUsername(), user.getScore(), accuracy);
             })
             .sorted((u1, u2) -> Integer.compare(u2.getScore(), u1.getScore()))
-            .limit(10)
             .toList();
     }
+
 }
