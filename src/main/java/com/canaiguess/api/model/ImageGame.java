@@ -28,6 +28,14 @@ public class ImageGame {
 
     private int batchNumber;
 
-    private boolean userGuessedCorrectly; // to track user specific results (for drill down)
+    private boolean userGuessedCorrectly; // to track user specific results
+
+    public ImageGame(Game game, Image image, int batchNumber) {
+        this.game = game;
+        this.image = image;
+        this.batchNumber = batchNumber;
+        this.userGuessedCorrectly = false; // default value
+    }
+
 
 }
