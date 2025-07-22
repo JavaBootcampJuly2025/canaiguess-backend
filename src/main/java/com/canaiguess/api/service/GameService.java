@@ -4,6 +4,8 @@ import com.canaiguess.api.dto.GameInfoResponseDTO;
 import com.canaiguess.api.dto.GameResultsDTO;
 import com.canaiguess.api.dto.NewGameRequestDTO;
 import com.canaiguess.api.dto.NewGameResponseDTO;
+import com.canaiguess.api.exception.GameDataIncompleteException;
+import com.canaiguess.api.exception.UnauthorizedAccessException;
 import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.ImageGame;
 import com.canaiguess.api.model.User;
@@ -30,6 +32,14 @@ public class GameService {
     }
 
     public NewGameResponseDTO createGame(NewGameRequestDTO request, User user) {
+
+        if (request.getBatchCount() <= 0 || request.getBatchSize() <= 0 || request.getDifficulty() < 0) {
+            throw new GameDataIncompleteException("Invalid game configuration values"
+                    + ". Batch count: " + request.getBatchCount()
+                    + ". Batch size: " + request.getBatchSize()
+                    + ". Difficulty: " + request.getDifficulty()
+            );
+        }
         Game game = new Game();
 
         game.setBatchCount(request.getBatchCount());
@@ -65,15 +75,15 @@ public class GameService {
                         .currentBatch(game.getCurrentBatch())
                         .difficulty(game.getDifficulty())
                         .build())
-                .orElse(null);
+                .orElseThrow(() -> new GameDataIncompleteException("Game not found by gameId: " + gameId));
     }
 
     public GameResultsDTO getGameResults(String gameId, User user) {
         Game game = gameRepository.findByPublicId(gameId)
-                .orElseThrow(() -> new RuntimeException("Game not found"));
+                .orElseThrow(() -> new GameDataIncompleteException("Game not found by publicId: " + gameId));
 
-        if (!game.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Unauthorized access to game results");
+        if (game.getUser() == null || !game.getUser().getId().equals(user.getId())) {
+            throw new UnauthorizedAccessException("Unauthorized access to game results");
         }
 
         List<ImageGame> imageGames = imageGameRepository.findByGame(game);

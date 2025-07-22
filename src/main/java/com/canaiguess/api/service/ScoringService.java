@@ -1,5 +1,6 @@
 package com.canaiguess.api.service;
 
+import com.canaiguess.api.exception.GameDataIncompleteException;
 import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.ImageGame;
 import com.canaiguess.api.model.User;
@@ -27,6 +28,9 @@ public class ScoringService {
 
     public void updateUserPoints(Game game) {
         List<ImageGame> imageGames = imageGameRepository.findByGame(game);
+        if (imageGames.isEmpty()) {
+            throw new GameDataIncompleteException("No ImageGame entries found for game ID: " + game.getId());
+        }
         User user = game.getUser();
 
         int correct = (int) imageGames.stream()

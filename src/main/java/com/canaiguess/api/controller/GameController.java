@@ -43,11 +43,12 @@ public class GameController {
     @Operation(summary = "Get game details by ID")
     public ResponseEntity<GameInfoResponseDTO> getGameById(@PathVariable String gameId) {
         GameInfoResponseDTO game = gameService.getGameByPublicId(gameId);
-        if (game != null) {
-            return ResponseEntity.ok(game);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return ResponseEntity.ok(game);
+//        if (game != null) {
+//            return ResponseEntity.ok(game);
+//        } else {
+//            return ResponseEntity.notFound().build();
+//        }
     }
 
     @CanAccessGame
