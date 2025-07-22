@@ -5,18 +5,17 @@ canaiguess is a backend for an interactive game where players try to determine:
 
 Players can try different game modes:
 1. Single image: Guess if it’s real or AI
-2. Pair: Which is AI? (one real, one fake)
+2. Pair: Which is which? (one real, one fake)
 3. Multiple images: Which ones are AI?
 
 Leaderboards for signed-in users keep things competitive and fun!
+Users can also get hints for any inage with the help of Gemini API.
 
 ---
 
 ## **Frontend Project**
 
-The frontend for canaiguess is built with **React** and **Vite**:  
-👉 [canaiguess-frontend repository](https://github.com/JavaBootcampJuly2025/canaiguess-frontend)  
-(Stack: React, Vite)
+The frontend for canaiguess is built with **React** and **Vite** is in [canaiguess-frontend repository](https://github.com/JavaBootcampJuly2025/canaiguess-frontend)  
 
 ---
 
@@ -30,15 +29,17 @@ The frontend for canaiguess is built with **React** and **Vite**:
 
 Database logic model:
 
-<img width="1434" height="956" alt="attels" src="https://github.com/user-attachments/assets/87d49fab-e36c-45d3-8c1e-09dc41faf086" />
+<img src="https://github.com/user-attachments/assets/87d49fab-e36c-45d3-8c1e-09dc41faf086" />
 
 App flowchart schema:
 
-<img width="1180" height="465" alt="attels" src="https://github.com/user-attachments/assets/211fff08-5cf4-4fb0-9a70-552ebc0ca02b" />
+<img src="https://github.com/user-attachments/assets/211fff08-5cf4-4fb0-9a70-552ebc0ca02b" />
 
 ## Dataset
 
-We use public datasets to provide real and AI-generated images.
+We use [this](https://www.kaggle.com/datasets/tristanzhang32/ai-generated-images-vs-real-images?select=test) public dataset from Kaggle to provide real and AI-generated images. 
+- Image Storage: Cloudflare R2
+- Database Hosting: Supabase
 
 ## **Potential Features**
 
@@ -59,6 +60,36 @@ Data from the game could be valuable for researchers working on human-AI percept
 ## **Game Security**
 
 - CAPTCHA test at the beginning for unauthorized users
+
+## Running the Backend with Docker
+
+### Step 1: Authenticate with GitHub Container Registry
+```
+echo YOUR_GITHUB_PAT | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
+```
+
+### Step 2: Pull the Image
+```
+docker pull ghcr.io/javabootcampjuly2025/canaiguess-backend/canaiguess:<IMAGE_TAG>
+```
+
+*Replace <IMAGE_TAG> with the specific version.*
+  
+### Step 3: Create a .env File
+
+Create a .env file in the same directory where you’ll run Docker. Contact any team member for required .env fields.
+```
+DB_URL=
+DB_USERNAME=
+DB_PASSWORD=
+JWT_SECRET=
+GOOGLE_API_KEY=
+```
+
+### Step 4: Run the Container
+```
+docker run --env-file .env -p 8080:8080 ghcr.io/javabootcampjuly2025/canaiguess-backend/canaiguess:<IMAGE_TAG>
+```
 
 <!-- START API DOCS -->
 
