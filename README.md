@@ -59,7 +59,8 @@ Data from the game could be valuable for researchers working on human-AI percept
 
 ## **Game Security**
 
-- CAPTCHA test at the beginning for unauthorized users
+- CAPTCHA for unauthenticated users
+- JWT-based authentication
 
 ## Running the Backend with Docker
 
