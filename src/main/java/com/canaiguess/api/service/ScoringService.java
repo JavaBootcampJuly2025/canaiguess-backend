@@ -14,39 +14,32 @@ import java.util.List;
 @Service
 public class ScoringService {
 
-    private final ImageGameRepository imageGameRepository;
     private final UserRepository userRepository;
     private final GameRepository gameRepository;
 
-    public ScoringService(ImageGameRepository imageGameRepository,
-                          UserRepository userRepository,
-                          GameRepository gameRepository) {
-        this.imageGameRepository = imageGameRepository;
+    public ScoringService(UserRepository userRepository, GameRepository gameRepository) {
         this.userRepository = userRepository;
         this.gameRepository = gameRepository;
     }
 
-    @Async
     public void updateScore(Game game) {
-        List<ImageGame> imageGames = imageGameRepository.findByGame(game);
         User user = game.getUser();
+        int correct = game.getCorrectGuesses();
 
-        int correct = (int) imageGames.stream()
-                .filter(ImageGame::isUserGuessedCorrectly)
-                .count();
-
-        double batchSizeEffect = 1 + (1 - Math.exp((double) -game.getBatchSize() / 5)); // 1 to 2 (softmax)
-        double difficultyEffect = game.getDifficulty() / 100.0; // 0 to 1 (proportional)
+        // score calculation
+        double batchSizeEffect = 1 + (1 - Math.exp((double) -game.getBatchSize() / 5));
+        double difficultyEffect = game.getDifficulty() / 100.0;
         int score = (int) Math.round(correct * difficultyEffect * batchSizeEffect * 10);
 
-        // save points to the Game entity
+        // save score to Game
         game.setScore(score);
         gameRepository.save(game);
 
-        // add to user derived fields
+        // update score for User
         user.setScore(user.getScore() + score);
-        user.setTotalGuesses(user.getTotalGuesses() + imageGames.size());
+        user.setTotalGuesses(user.getTotalGuesses() + game.getTotalGuesses());
         user.setCorrectGuesses(user.getCorrectGuesses() + correct);
         userRepository.save(user);
     }
 }
+

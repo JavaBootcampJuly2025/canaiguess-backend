@@ -1,6 +1,6 @@
 package com.canaiguess.api.controller;
 
-import com.canaiguess.api.dto.GameResultsDTO;
+import com.canaiguess.api.dto.GameDTO;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.service.UserStatsService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,7 +21,7 @@ public class UserStatsController {
     }
 
     @GetMapping("/history")
-    public List<GameResultsDTO> getGameHistory(@AuthenticationPrincipal User user) {
-        return userStatsService.getGameResults(user);
+    public List<GameDTO> getGameHistory(@AuthenticationPrincipal User user) {
+        return userStatsService.getGamesByUser(user);
     }
 }

@@ -1,6 +1,6 @@
 package com.canaiguess.api.service;
 
-import com.canaiguess.api.dto.GameResultsDTO;
+import com.canaiguess.api.dto.GameDTO;
 import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.GameRepository;
@@ -21,22 +21,12 @@ public class UserStatsService {
         this.gameService = gameService;
     }
 
-    public List<GameResultsDTO> getGameResults(User user) {
+    public List<GameDTO> getGamesByUser(User user) {
         List<Game> games = gameRepository.findByUserIdOrderByCreatedAtDesc(user.getId(), PageRequest.of(0, 10));
 
         return games.stream()
             .map(game -> {
-                try {
-                    return gameService.getGameResults(game.getPublicId(), user);
-                } catch (IllegalStateException e) {
-                    // game not finished or score not ready, return partial result
-                    return new GameResultsDTO(
-                            game.getPublicId(),
-                            null, null, null,
-                            game.getScore(),
-                            game.getCreatedAt()
-                    );
-                }
+                return gameService.getGameByPublicId(game.getPublicId(), user);
             })
             .toList();
     }

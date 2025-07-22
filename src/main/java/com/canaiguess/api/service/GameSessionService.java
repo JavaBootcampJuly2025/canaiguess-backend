@@ -41,7 +41,6 @@ public class GameSessionService {
         }
 
         int batch = game.getCurrentBatch();
-
         List<ImageGame> imageGames = imageGameRepository.findByGameAndBatchNumber(game, batch);
 
         if (imageGames.size() != guesses.size()) {
@@ -49,18 +48,21 @@ public class GameSessionService {
         }
 
         List<Boolean> correct = new ArrayList<>();
+        int correctCount = 0;
+
         for (int i = 0; i < imageGames.size(); i++) {
             ImageGame ig = imageGames.get(i);
             Image image = ig.getImage();
             boolean userGuess = guesses.get(i);
             boolean isAI = image.isFake();
 
-            // stats update
             image.setTotal(image.getTotal() + 1);
+
             if (userGuess == isAI) {
                 image.setCorrect(image.getCorrect() + 1);
                 ig.setUserGuessedCorrectly(true);
                 correct.add(true);
+                correctCount++;
             } else {
                 ig.setUserGuessedCorrectly(false);
                 correct.add(false);
@@ -70,17 +72,20 @@ public class GameSessionService {
             imageGameRepository.save(ig);
         }
 
+        // Update derived stats on game
+        game.setCorrectGuesses(game.getCorrectGuesses() + correctCount);
+        game.setTotalGuesses(game.getTotalGuesses() + guesses.size());
         game.setCurrentBatch(batch + 1);
         gameRepository.save(game);
 
-        // if this was the final batch,
-        // update user score and set game score
+        // score game after final batch
         if (batch == game.getBatchCount()) {
-            scoringService.updateScore(game); // async
+            scoringService.updateScore(game);
         }
 
         return correct;
     }
+
 
     public List<ImageDTO> getNextBatchForGame(String gameId, User user) {
         Game game = gameRepository.findByPublicId(gameId)
