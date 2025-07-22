@@ -27,7 +27,8 @@ public class SecurityConfiguration {
             "/configuration/security",
             "/swagger-ui/**",
             "/webjars/**",
-            "/swagger-ui.html"
+            "/swagger-ui.html",
+            "/api/game/**" // so anonymous games can be tackled
     };
 
     private final JwtAuthenticationFilter jwtAuthFilter;

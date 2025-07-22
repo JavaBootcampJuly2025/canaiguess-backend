@@ -1,5 +1,6 @@
 package com.canaiguess.api.service;
 
+import com.canaiguess.api.dto.ImageDTO;
 import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.Image;
 import com.canaiguess.api.model.ImageGame;
@@ -7,7 +8,6 @@ import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.GameRepository;
 import com.canaiguess.api.repository.ImageGameRepository;
 import com.canaiguess.api.repository.ImageRepository;
-import com.canaiguess.api.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -32,8 +32,8 @@ public class GameSessionService {
         this.scoringService = scoringService;
     }
 
-    public List<Boolean> validateGuesses(Long gameId, User user, List<Boolean> guesses) {
-        Game game = gameRepository.findById(gameId)
+    public List<Boolean> validateGuesses(String gameId, User user, List<Boolean> guesses) {
+        Game game = gameRepository.findByPublicId(gameId)
                 .orElseThrow(() -> new RuntimeException("Game not found"));
 
         if (!game.getUser().getId().equals(user.getId())) {
@@ -83,9 +83,8 @@ public class GameSessionService {
         return correct;
     }
 
-
-    public List<String> getNextBatchForGame(long gameId, User user) {
-        Game game = gameRepository.findById(gameId)
+    public List<ImageDTO> getNextBatchForGame(String gameId, User user) {
+        Game game = gameRepository.findByPublicId(gameId)
                 .orElseThrow(() -> new RuntimeException("Game not found"));
 
         if (!game.getUser().getId().equals(user.getId())) {
@@ -97,14 +96,18 @@ public class GameSessionService {
         }
 
         int currentBatch = game.getCurrentBatch();
-
         List<ImageGame> imageGames = imageGameRepository.findByGameAndBatchNumber(game, currentBatch);
+
         if (imageGames.isEmpty()) {
             throw new RuntimeException("No images found for current batch");
         }
 
         return imageGames.stream()
-                .map(ig -> ig.getImage().getFilename())
+                .map(ig -> new ImageDTO(
+                        ig.getImage().getPublicId(),
+                        ig.getImage().getUrl()
+                ))
                 .toList();
     }
+
 }

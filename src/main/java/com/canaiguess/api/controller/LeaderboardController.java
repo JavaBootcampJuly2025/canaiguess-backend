@@ -25,4 +25,10 @@ public class LeaderboardController
     {
         return leaderboardService.getLeaderboard();
     }
+
+    @GetMapping("/accuracy")
+    public List<LeaderboardDTO> getAccuracyLeaderboard()
+    {
+        return leaderboardService.getAccuracyLeaderboard();
+    }
 }
