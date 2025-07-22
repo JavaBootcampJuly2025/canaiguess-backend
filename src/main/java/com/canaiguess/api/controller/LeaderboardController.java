@@ -1,6 +1,6 @@
 package com.canaiguess.api.controller;
 
-import com.canaiguess.api.dto.LeaderboardDTO;
+import com.canaiguess.api.dto.UserDTO;
 import com.canaiguess.api.service.LeaderboardService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,14 +21,9 @@ public class LeaderboardController
     }
 
     @GetMapping
-    public List<LeaderboardDTO> getLeaderboard()
+    public List<UserDTO> getLeaderboard()
     {
         return leaderboardService.getLeaderboard();
     }
 
-    @GetMapping("/accuracy")
-    public List<LeaderboardDTO> getAccuracyLeaderboard()
-    {
-        return leaderboardService.getAccuracyLeaderboard();
-    }
 }

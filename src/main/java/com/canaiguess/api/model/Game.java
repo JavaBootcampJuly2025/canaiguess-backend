@@ -36,16 +36,30 @@ public class Game {
 
     private int currentBatch;
 
-    private boolean finished; // derived from batches and currentBatch
+    @Transient
+    public boolean isFinished() {
+        return currentBatch > batchCount;
+    }
 
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ImageGame> imageGames;
 
-    @Column(nullable = false)
-    private int score = 0; // needed for last 10 user games
+    @Column
+    private Integer score; // needed for last 10 user games
 
     @CreationTimestamp
     private LocalDateTime createdAt; // needed for last 10 user games
+
+    @Column(nullable = false)
+    private Integer totalGuesses = 0; // derived field
+
+    @Column(nullable = false)
+    private Integer correctGuesses = 0; // derived field
+
+    @Transient
+    public double getAccuracy() {
+        return totalGuesses > 0 ? ((double) correctGuesses / totalGuesses) * 100.0 : 0.0;
+    }
 
     @PrePersist
     public void ensurePublicId() {
