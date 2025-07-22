@@ -71,14 +71,13 @@ public class GameSessionService {
         }
 
         game.setCurrentBatch(batch + 1);
-
-        // if this was the final batch, finish and score
-        if (batch == game.getBatchCount()) {
-            scoringService.updateUserPoints(game);
-            game.setFinished(true);
-        }
-
         gameRepository.save(game);
+
+        // if this was the final batch,
+        // update user score and set game score
+        if (batch == game.getBatchCount()) {
+            scoringService.updateScore(game); // async
+        }
 
         return correct;
     }

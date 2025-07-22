@@ -6,6 +6,7 @@ import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.ImageGameRepository;
 import com.canaiguess.api.repository.UserRepository;
 import com.canaiguess.api.repository.GameRepository;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,7 +26,8 @@ public class ScoringService {
         this.gameRepository = gameRepository;
     }
 
-    public void updateUserPoints(Game game) {
+    @Async
+    public void updateScore(Game game) {
         List<ImageGame> imageGames = imageGameRepository.findByGame(game);
         User user = game.getUser();
 
@@ -37,12 +39,14 @@ public class ScoringService {
         double difficultyEffect = game.getDifficulty() / 100.0; // 0 to 1 (proportional)
         int score = (int) Math.round(correct * difficultyEffect * batchSizeEffect * 10);
 
-        // Add to user's total score
-        user.setScore(user.getScore() + score);
-        userRepository.save(user);
-
-        // Save points to the Game entity
+        // save points to the Game entity
         game.setScore(score);
         gameRepository.save(game);
+
+        // add to user derived fields
+        user.setScore(user.getScore() + score);
+        user.setTotalGuesses(user.getTotalGuesses() + imageGames.size());
+        user.setCorrectGuesses(user.getCorrectGuesses() + correct);
+        userRepository.save(user);
     }
 }

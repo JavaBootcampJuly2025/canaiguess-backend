@@ -36,13 +36,16 @@ public class Game {
 
     private int currentBatch;
 
-    private boolean finished; // derived from batches and currentBatch
+    @Transient
+    public boolean isFinished() {
+        return currentBatch > batchCount;
+    }
 
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ImageGame> imageGames;
 
-    @Column(nullable = false)
-    private int score = 0; // needed for last 10 user games
+    @Column
+    private Integer score; // needed for last 10 user games
 
     @CreationTimestamp
     private LocalDateTime createdAt; // needed for last 10 user games

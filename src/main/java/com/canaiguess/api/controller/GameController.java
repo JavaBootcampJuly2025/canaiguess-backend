@@ -1,6 +1,7 @@
 package com.canaiguess.api.controller;
 
 import com.canaiguess.api.dto.*;
+import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.service.GameService;
 import com.canaiguess.api.service.GameSessionService;
