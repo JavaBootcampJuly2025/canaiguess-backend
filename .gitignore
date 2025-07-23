@@ -35,3 +35,4 @@ build/
 
 # ignore my local secret file
 secret-key.env
+image_rows.sql
