@@ -1,6 +1,7 @@
 package com.canaiguess.api.service;
 
 import com.canaiguess.api.dto.UserDTO;
+import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,8 @@ public class LeaderboardService
         return topUsers.stream()
             .map(user -> {
                 double accuracy = 0.0;
+                List<Game> games = user.getGames();
+
                 if (user.getTotalGuesses() > 0)
                 {
                     accuracy = (double) user.getCorrectGuesses() / user.getTotalGuesses();
@@ -35,7 +38,7 @@ public class LeaderboardService
                         accuracy,
                         user.getTotalGuesses(),
                         user.getCorrectGuesses(),
-                        user.getGames() != null ? user.getGames().size() : 0
+                        games != null ? games.size() : 0
                 );
             })
             .toList();
