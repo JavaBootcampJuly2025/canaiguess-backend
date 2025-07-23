@@ -5,6 +5,7 @@ import com.canaiguess.api.dto.GameDTO;
 import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.GameRepository;
+import com.canaiguess.api.repository.UserRepository;
 import com.canaiguess.api.repository.ImageGameRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ public class UserStatsService
     private final GameRepository gameRepository;
     private final ImageGameRepository imageGameRepository;
     private final GameService gameService;
+    private final UserRepository userRepository;
 
     public UserStatsService(GameRepository gameRepository, GameService gameService, ImageGameRepository imageGameRepository)
     {
@@ -55,4 +57,5 @@ public class UserStatsService
                 .map(game -> gameService.getGameByPublicId(game.getPublicId(), user))
                 .toList();
     }
+
 }
