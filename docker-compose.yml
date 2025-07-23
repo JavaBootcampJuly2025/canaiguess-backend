@@ -44,6 +44,8 @@ services:
     networks:
       - canaiguess-net
     command: mvn test
+    profiles: [ "test" ]
+    restart: "no"
 
 networks:
   canaiguess-net:
