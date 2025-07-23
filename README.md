@@ -142,7 +142,7 @@ http://localhost:8080/swagger-ui/index.html
 ---
 
 <details>
-<summary><strong>📦 API Data Transfer Objects</strong></summary>
+<summary><strong>[📦 API Data Transfer Objects](#📦-api-data-transfer-objects)</strong></summary>
 
 <br/>
 
