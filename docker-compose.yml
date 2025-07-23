@@ -32,6 +32,19 @@ services:
     networks:
       - canaiguess-net
 
+  test:
+    image: maven:3.9.6-eclipse-temurin-21
+    volumes:
+      - .:/app
+    working_dir: /app
+    depends_on:
+      - db
+    env_file:
+      - .env
+    networks:
+      - canaiguess-net
+    command: mvn test
+
 networks:
   canaiguess-net:
 
