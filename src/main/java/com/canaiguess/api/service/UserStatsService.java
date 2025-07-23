@@ -1,6 +1,7 @@
 package com.canaiguess.api.service;
 
 import com.canaiguess.api.dto.GameDTO;
+import com.canaiguess.api.dto.UserDTO;
 import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.GameRepository;
@@ -23,6 +24,29 @@ public class UserStatsService {
         this.gameRepository = gameRepository;
         this.gameService = gameService;
         this.userRepository = userRepository;
+    }
+
+    public UserDTO getUserStats(String username)
+    {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
+
+        int totalGames = user.getGames() != null ? user.getGames().size() : 0;
+
+        double avgAccuracy = 0.0;
+        if (user.getTotalGuesses() > 0)
+        {
+            avgAccuracy = (double) user.getCorrectGuesses() / user.getTotalGuesses();
+        }
+
+        return UserDTO.builder()
+                .username(user.getUsername())
+                .score(user.getScore())
+                .accuracy(avgAccuracy)
+                .totalGuesses(user.getTotalGuesses())
+                .correctGuesses(user.getCorrectGuesses())
+                .totalGames(totalGames)
+                .build();
     }
 
     public List<GameDTO> getGamesByUser(String username) {

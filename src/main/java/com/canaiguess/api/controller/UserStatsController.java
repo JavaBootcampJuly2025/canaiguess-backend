@@ -22,6 +22,13 @@ public class UserStatsController {
         this.userStatsService = userStatsService;
     }
 
+    @GetMapping("/{username}/stats")
+    public UserDTO getUserStats(@PathVariable String username,
+                                @AuthenticationPrincipal User user)
+    {
+        return userStatsService.getUserStats(username);
+    }
+
     @GetMapping("/{username}/games")
     public List<GameDTO> getUserGames(@PathVariable String username,
                                       @AuthenticationPrincipal User user) {
