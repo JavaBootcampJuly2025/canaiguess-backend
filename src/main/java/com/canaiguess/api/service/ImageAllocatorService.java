@@ -87,8 +87,14 @@ public class ImageAllocatorService {
         Collections.shuffle(fakeImages);
 
         for (int batch = 1; batch <= batchCount; batch++) {
-            imageGameRepository.save(new ImageGame(game, realImages.get(batch - 1), batch));
-            imageGameRepository.save(new ImageGame(game, fakeImages.get(batch - 1), batch));
+            Image real = realImages.get(batch - 1);
+            Image fake = fakeImages.get(batch - 1);
+
+            List<Image> pair = new ArrayList<>(List.of(real, fake));
+            Collections.shuffle(pair); // randomize order of real & fake
+
+            imageGameRepository.save(new ImageGame(game, pair.get(0), batch));
+            imageGameRepository.save(new ImageGame(game, pair.get(1), batch));
         }
     }
 
