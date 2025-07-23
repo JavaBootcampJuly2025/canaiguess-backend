@@ -1,15 +1,10 @@
 package com.canaiguess.api.service;
 
 import com.canaiguess.api.model.Game;
-import com.canaiguess.api.model.ImageGame;
 import com.canaiguess.api.model.User;
-import com.canaiguess.api.repository.ImageGameRepository;
 import com.canaiguess.api.repository.UserRepository;
 import com.canaiguess.api.repository.GameRepository;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class ScoringService {
