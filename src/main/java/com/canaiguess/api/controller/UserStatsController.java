@@ -5,6 +5,7 @@ import com.canaiguess.api.model.User;
 import com.canaiguess.api.service.UserStatsService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,8 +21,9 @@ public class UserStatsController {
         this.userStatsService = userStatsService;
     }
 
-    @GetMapping("/history")
-    public List<GameDTO> getGameHistory(@AuthenticationPrincipal User user) {
-        return userStatsService.getGamesByUser(user);
+    @GetMapping("/{username}/games")
+    public List<GameDTO> getUserGames(@PathVariable String username,
+                                      @AuthenticationPrincipal User user) {
+        return userStatsService.getGamesByUser(username);
     }
 }

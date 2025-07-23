@@ -25,4 +25,3 @@ public class GameDTO {
     private int batchSize;
     private int difficulty;
 }
-
