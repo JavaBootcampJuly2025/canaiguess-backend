@@ -35,9 +35,9 @@ class GameControllerTest {
     @Test
     void createGame_shouldReturnNewGameResponse() {
         // Arrange
-        NewGameRequestDTO request = new NewGameRequestDTO(3, 5, 2); // Example values
-        User user = new User(); // Could populate fields if needed
-        NewGameResponseDTO expectedResponse = new NewGameResponseDTO(42L);
+        NewGameRequestDTO request = new NewGameRequestDTO(3, 5, 2);
+        User user = new User();
+        NewGameResponseDTO expectedResponse = new NewGameResponseDTO("42");
 
         when(gameService.createGame(request, user)).thenReturn(expectedResponse);
 
@@ -47,56 +47,48 @@ class GameControllerTest {
         // Assert
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
-        assertEquals(42L, response.getBody().getGameId());
+        assertEquals("42", response.getBody().getGameId());
         verify(gameService).createGame(request, user);
     }
 
     @Test
-    void getGameById_shouldReturnGameInfo_whenGameExists() {
-        Long gameId = 1L;
-        GameInfoResponseDTO gameInfo = new GameInfoResponseDTO();
+    void getGameByPublicId_shouldReturnGameInfo_whenGameExists() {
+        String gameId = "1";
+        User user = new User();
+        GameDTO gameDto = new GameDTO();
 
-        when(gameService.getGameById(gameId)).thenReturn(gameInfo);
+        when(gameService.getGameByPublicId(gameId, user)).thenReturn(gameDto);
 
-        ResponseEntity<GameInfoResponseDTO> response = gameController.getGameById(gameId);
+        ResponseEntity<GameDTO> response = gameController.getGameById(gameId, user);
 
         assertEquals(200, response.getStatusCode().value());
-        assertEquals(gameInfo, response.getBody());
-        verify(gameService).getGameById(gameId);
-    }
-
-    @Test
-    void getGameById_shouldReturnNotFound_whenGameDoesNotExist() {
-        Long gameId = 1L;
-
-        when(gameService.getGameById(gameId)).thenReturn(null);
-
-        ResponseEntity<GameInfoResponseDTO> response = gameController.getGameById(gameId);
-
-        assertEquals(404, response.getStatusCode().value());
-        assertNull(response.getBody());
-        verify(gameService).getGameById(gameId);
+        assertEquals(gameDto, response.getBody());
+        verify(gameService).getGameByPublicId(gameId, user);
     }
 
     @Test
     void getNextBatch_shouldReturnImageBatchResponse() {
-        Long gameId = 1L;
+        String gameId = "1";
         User user = new User();
-        List<String> imageUrls = Arrays.asList("img1.jpg", "img2.jpg");
 
-        when(gameSessionService.getNextBatchForGame(gameId, user)).thenReturn(imageUrls);
+        // Create proper ImageDTO objects instead of empty constructors
+        ImageDTO image1 = new ImageDTO("img1.jpg", "description1");
+        ImageDTO image2 = new ImageDTO("img2.jpg", "description2");
+        List<ImageDTO> images = Arrays.asList(image1, image2);
+
+        when(gameSessionService.getNextBatchForGame(gameId, user)).thenReturn(images);
 
         ResponseEntity<ImageBatchResponseDTO> response = gameController.getNextBatch(gameId, user);
 
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
-        assertEquals(imageUrls, response.getBody().getImages());
+        assertEquals(images, response.getBody().getImages());
         verify(gameSessionService).getNextBatchForGame(gameId, user);
     }
 
     @Test
     void validateGuesses_shouldReturnGuessResults() {
-        Long gameId = 1L;
+        String gameId = "1";
         User user = new User();
         List<Boolean> guesses = Arrays.asList(Boolean.TRUE, Boolean.FALSE);
         GuessRequestDTO guessRequest = new GuessRequestDTO(guesses);
@@ -110,20 +102,5 @@ class GameControllerTest {
         assertNotNull(response.getBody());
         assertEquals(results, response.getBody().getCorrect());
         verify(gameSessionService).validateGuesses(gameId, user, guessRequest.getGuesses());
-    }
-
-    @Test
-    void getGameResults_shouldReturnGameResults() {
-        Long gameId = 1L;
-        User user = new User();
-        GameResultsDTO results = new GameResultsDTO(3, 1, 75, 3); // assuming constructor is (correct, incorrect, score, total)
-
-        when(gameService.getGameResults(gameId, user)).thenReturn(results);
-
-        ResponseEntity<GameResultsDTO> response = gameController.getGameResults(gameId, user);
-
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(results, response.getBody());
-        verify(gameService).getGameResults(gameId, user);
     }
 }
