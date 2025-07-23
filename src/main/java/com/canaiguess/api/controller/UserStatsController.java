@@ -14,25 +14,17 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")
-public class UserStatsController
-{
+public class UserStatsController {
 
     private final UserStatsService userStatsService;
 
-    public UserStatsController(UserStatsService userStatsService)
-    {
+    public UserStatsController(UserStatsService userStatsService) {
         this.userStatsService = userStatsService;
     }
 
-    @GetMapping
-    public UserDTO getUserStats(@AuthenticationPrincipal User user)
-    {
-        return userStatsService.getUserStats(user);
-    }
-
-    @GetMapping("/history")
-    public List<GameDTO> getGameHistory(@AuthenticationPrincipal User user)
-    {
-        return userStatsService.getGamesByUser(user);
+    @GetMapping("/{username}/games")
+    public List<GameDTO> getUserGames(@PathVariable String username,
+                                      @AuthenticationPrincipal User user) {
+        return userStatsService.getGamesByUser(username);
     }
 }
