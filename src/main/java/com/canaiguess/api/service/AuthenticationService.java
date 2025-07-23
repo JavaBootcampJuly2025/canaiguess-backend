@@ -37,6 +37,8 @@ public class AuthenticationService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .score(0)
+                .totalGuesses(0)
+                .correctGuesses(0)
                 .role(Role.USER)
                 .build();
         repository.save(user);
