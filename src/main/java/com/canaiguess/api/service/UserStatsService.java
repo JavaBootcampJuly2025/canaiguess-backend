@@ -19,7 +19,6 @@ public class UserStatsService
     private final GameRepository gameRepository;
     private final ImageGameRepository imageGameRepository;
     private final GameService gameService;
-    private final UserRepository userRepository;
 
     public UserStatsService(GameRepository gameRepository, GameService gameService, ImageGameRepository imageGameRepository)
     {
