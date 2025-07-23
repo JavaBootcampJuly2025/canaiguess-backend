@@ -1,5 +1,6 @@
 package com.canaiguess.api.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,6 +14,7 @@ import java.util.Set;
 import static com.canaiguess.api.exception.BusinessErrorCodes.*;
 import static org.springframework.http.HttpStatus.*;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -136,7 +138,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ExceptionResponse> handleException(Exception exp) {
         // 2DO log the exception
-        exp.printStackTrace();
+        log.warn("Unexpected exception occurred: {}", exp.getMessage());
         return ResponseEntity
                 .status(INTERNAL_SERVER_ERROR)
                 .body(

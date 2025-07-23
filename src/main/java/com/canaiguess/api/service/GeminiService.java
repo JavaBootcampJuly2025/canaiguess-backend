@@ -10,6 +10,7 @@ import com.google.genai.Client;
 import com.google.genai.types.Content;
 import com.google.genai.types.GenerateContentResponse;
 import com.google.genai.types.Part;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 
@@ -20,6 +21,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 
+@Slf4j
 @Service
 public class GeminiService {
 
@@ -59,7 +61,7 @@ public class GeminiService {
         }
 
         byte[] imageBytes;
-        //try {
+
         try {
             imageBytes = fetchBytesFromUrl(imageUrl);
         } catch (IOException | InterruptedException ex) {
@@ -92,11 +94,11 @@ public class GeminiService {
                 break; // success
 
             } catch (InvalidHintResponseException | IllegalArgumentException e) {
-                // Known validation failure, try next model
-                System.err.println("Model " + model + " returned invalid data: " + e.getMessage());
+                // known validation failure, try next model
+                log.info("Model {} returned invalid data: {}", model, e.getMessage());
             } catch (Exception modelError) {
                 // JsonProcessingException | IllegalArgumentException
-                System.err.println("Model " + model + " failed: " + modelError.getMessage());
+                log.info("Model {} failed: {}", model, modelError.getMessage());
                 // continue to try next model
             }
         }
@@ -106,16 +108,13 @@ public class GeminiService {
         }
 
         modelGuessService.storeModelGuessAsync(imageUrl, dto)
-                .exceptionally(ex -> {
-                    System.err.println("Failed to store model guess: {}" + ex.getMessage());
-                    return null;
-                });
+            .exceptionally(ex -> {
+                log.info("Failed to store model guess: {}", ex.getMessage());
+                return null;
+            });
 
         return dto;
 
-//        } catch (Exception e) {
-//            throw new GeminiModelException("Failed to analyze image: " + e.getMessage(), e);
-//        }
     }
 
     private byte[] fetchBytesFromUrl(String url) throws IOException, InterruptedException {
