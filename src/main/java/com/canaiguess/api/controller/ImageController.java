@@ -59,11 +59,13 @@ public class ImageController {
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Upload an image (ADMIN)")
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadImage(@RequestParam UploadImageRequestDTO request,
-                                              @AuthenticationPrincipal User user) {
-
+    public ResponseEntity<String> uploadImage(
+            @ModelAttribute UploadImageRequestDTO request, // cant use path variable for files
+            @AuthenticationPrincipal User user
+    ) {
         String url = uploadService.uploadAndSave(request.getFile(), request.isFake());
         return ResponseEntity.ok(url);
     }
+
 
 }
