@@ -38,7 +38,7 @@ public class GameSessionService {
         Game game = gameRepository.findByPublicId(gameId)
                 .orElseThrow(() -> new GameDataIncompleteException("Game not found by gameId: " + gameId));
 
-        if (!game.getUser().getId().equals(user.getId())) {
+        if (game.getUser() != null && !game.getUser().getId().equals(user.getId())) {
             throw new UnauthorizedAccessException("Unauthorized access to the game");
         }
 
@@ -96,7 +96,7 @@ public class GameSessionService {
         Game game = gameRepository.findByPublicId(gameId)
                 .orElseThrow(() -> new GameDataIncompleteException("Game not found by publicId: " + gameId));
 
-        if (!game.getUser().getId().equals(user.getId())) {
+        if (game.getUser() != null && !game.getUser().getId().equals(user.getId())) {
             throw new UnauthorizedAccessException("Unauthorized access to the game");
         }
 

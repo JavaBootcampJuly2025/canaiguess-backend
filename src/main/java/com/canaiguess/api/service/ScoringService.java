@@ -30,7 +30,7 @@ public class ScoringService {
         // save score to Game
         game.setScore(score);
         gameRepository.save(game);
-
+        if(user == null) return;
         // update score for User
         int userScore = user.getScore() != null ? user.getScore() : 0;
         int userTotal = user.getTotalGuesses() != null ? user.getTotalGuesses() : 0;
