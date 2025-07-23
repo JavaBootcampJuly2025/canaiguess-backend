@@ -10,6 +10,7 @@ import com.canaiguess.api.service.ImageReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,10 +31,7 @@ public class ImageController {
         this.imageReportService = imageReportService;
     }
 
-    @Operation(
-            summary = "Get a hint for an image",
-            description = "Analyzes the given image using Gemini and returns a response to the user's prompt."
-    )
+    @Operation(summary = "Get a hint for an image")
     @PostMapping("/{imageId}/hint")
     public ResponseEntity<HintResponseDTO> getHint(
             @PathVariable String imageId,
@@ -46,6 +44,7 @@ public class ImageController {
         return ResponseEntity.ok(result);
     }
 
+    @Operation(summary = "Report an image")
     @PostMapping("/{imageId}/report")
     public ResponseEntity<Void> reportImage(
             @PathVariable String imageId,

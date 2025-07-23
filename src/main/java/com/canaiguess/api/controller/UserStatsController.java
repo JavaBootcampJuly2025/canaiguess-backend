@@ -4,6 +4,7 @@ import com.canaiguess.api.dto.GameDTO;
 import com.canaiguess.api.dto.UserDTO;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.service.UserStatsService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,13 +23,14 @@ public class UserStatsController {
         this.userStatsService = userStatsService;
     }
 
+    @PreAuthorize("hasRole('ADMIN') or #username == authentication.name")
     @GetMapping("/{username}/stats")
     public UserDTO getUserStats(@PathVariable String username,
-                                @AuthenticationPrincipal User user)
-    {
+                                @AuthenticationPrincipal User user) {
         return userStatsService.getUserStats(username);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or #username == authentication.name")
     @GetMapping("/{username}/games")
     public List<GameDTO> getUserGames(@PathVariable String username,
                                       @AuthenticationPrincipal User user) {
