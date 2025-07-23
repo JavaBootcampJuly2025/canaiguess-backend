@@ -31,7 +31,7 @@ public class UserStatsService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
 
-        int totalGames = user.getGames() != null ? user.getGames().size() : 0;
+        int totalGames = gameRepository.countGamesByUsername(username);
 
         double avgAccuracy = 0.0;
         if (user.getTotalGuesses() > 0)
