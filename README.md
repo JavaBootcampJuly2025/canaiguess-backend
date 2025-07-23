@@ -22,7 +22,6 @@ CANAIGUESS is a Backend API for an interactive game where players try to determi
 - [Run with Docker Compose](#option-a-run-with-docker-compose)
 - [Run with Docker Image](#option-b-run-with-docker-image)
 - [API Endpoints](#api-endpoints)
-- [📦 API Data Transfer Objects](#📦-api-data-transfer-objects)
 
 Players can try different game modes depending both on the number of rounds and batch size for each round:
 1. Single image: is it real or AI?
@@ -142,7 +141,7 @@ http://localhost:8080/swagger-ui/index.html
 ---
 
 <details>
-<summary><strong>[📦 API Data Transfer Objects](#📦-api-data-transfer-objects)</strong></summary>
+<summary><strong>📦 API Data Transfer Objects]</strong></summary>
 
 <br/>
 
