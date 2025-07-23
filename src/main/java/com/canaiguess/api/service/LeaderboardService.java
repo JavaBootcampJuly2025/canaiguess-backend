@@ -1,34 +1,43 @@
 package com.canaiguess.api.service;
 
 import com.canaiguess.api.dto.UserDTO;
+import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class LeaderboardService {
+public class LeaderboardService
+{
 
     private final UserRepository userRepository;
 
-    public LeaderboardService(UserRepository userRepository) {
+    public LeaderboardService(UserRepository userRepository)
+    {
         this.userRepository = userRepository;
     }
 
-    public List<UserDTO> getLeaderboard() {
-        return userRepository.findAll().stream()
-            .map(user -> {
-                int totalGuesses = user.getTotalGuesses() != null ? user.getTotalGuesses() : 0;
-                int correctGuesses = user.getCorrectGuesses() != null ? user.getCorrectGuesses() : 0;
+    public List<UserDTO> getLeaderboard()
+    {
+        List<User> topUsers = userRepository.findTop10ByOrderByScoreDesc();
 
-                double accuracy = totalGuesses > 0
-                        ? ((double) correctGuesses / totalGuesses) * 100.0
-                        : 0.0;
-
-                return new UserDTO(user.getUsername(), user.getScore(), accuracy);
-            })
-            .sorted((u1, u2) -> Integer.compare(u2.getScore(), u1.getScore()))
-            .toList();
+        return topUsers.stream()
+                .map(user -> {
+                    double accuracy = 0.0;
+                    if (user.getTotalGuesses() > 0)
+                    {
+                        accuracy = (double) user.getCorrectGuesses() / user.getTotalGuesses();
+                    }
+                    return new UserDTO(
+                            user.getUsername(),
+                            user.getScore(),
+                            accuracy,
+                            user.getTotalGuesses(),
+                            user.getCorrectGuesses(),
+                            user.getGames() != null ? user.getGames().size() : 0
+                    );
+                })
+                .toList();
     }
-
 }
