@@ -1,5 +1,6 @@
 package com.canaiguess.api.service;
 
+import com.canaiguess.api.exception.GameDataIncompleteException;
 import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.UserRepository;

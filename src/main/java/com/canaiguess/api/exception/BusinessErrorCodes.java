@@ -11,6 +11,7 @@ public enum BusinessErrorCodes {
     NEW_PASSWORD_DOES_NOT_MATCH(301, BAD_REQUEST, "New password does not match"),
     BAD_CREDENTIALS(302, FORBIDDEN, "Username or password is incorrect"),
     RESOURCE_ALREADY_IN_USE(303, CONFLICT, "Resource is already in use"),
+    UNAUTHORIZED_ACCESS(304, UNAUTHORIZED, "Unauthorized access"),
     ;
 
     @Getter
