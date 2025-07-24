@@ -7,7 +7,7 @@ import java.time.Instant;
 
 @Data
 @Builder
-public class ImageReportTO {
+public class ImageReportDTO {
     private Long reportId;
     private String imageId;
     private String imageUrl;

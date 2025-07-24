@@ -1,6 +1,7 @@
 package com.canaiguess.api.controller;
 
 import com.canaiguess.api.dto.HintResponseDTO;
+import com.canaiguess.api.dto.ImageDTO;
 import com.canaiguess.api.dto.SubmitReportRequestDTO;
 import com.canaiguess.api.dto.UploadImageRequestDTO;
 import com.canaiguess.api.model.Image;
@@ -86,7 +87,7 @@ public class ImageController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/deleted")
     @Operation(summary = "List soft-deleted images (ADMIN)")
-    public ResponseEntity<Page<Image>> getDeletedImages(
+    public ResponseEntity<Page<ImageDTO>> getDeletedImages(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {

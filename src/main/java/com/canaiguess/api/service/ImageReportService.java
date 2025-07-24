@@ -1,6 +1,6 @@
 package com.canaiguess.api.service;
 
-import com.canaiguess.api.dto.ImageReportTO;
+import com.canaiguess.api.dto.ImageReportDTO;
 import com.canaiguess.api.dto.SubmitReportRequestDTO;
 import com.canaiguess.api.exception.GameDataIncompleteException;
 import com.canaiguess.api.exception.InvalidReportException;
@@ -9,7 +9,6 @@ import com.canaiguess.api.model.ImageReport;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.ImageReportRepository;
 import com.canaiguess.api.repository.ImageRepository;
-import com.canaiguess.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -35,10 +34,10 @@ public class ImageReportService {
         imageReportRepository.save(report);
     }
 
-    public List<ImageReportTO> getUnresolvedReports() {
+    public List<ImageReportDTO> getUnresolvedReports() {
         return imageReportRepository.findByResolvedFalseOrderByTimestampDesc()
             .stream()
-            .map(report -> ImageReportTO.builder()
+            .map(report -> ImageReportDTO.builder()
                     .reportId(report.getId())
                     .imageId(report.getImage().getPublicId())
                     .imageUrl(report.getImage().getUrl())

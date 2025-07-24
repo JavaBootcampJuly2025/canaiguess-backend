@@ -1,5 +1,6 @@
 package com.canaiguess.api.service;
 
+import com.canaiguess.api.dto.ImageDTO;
 import com.canaiguess.api.model.Image;
 import com.canaiguess.api.repository.ImageRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,9 +32,11 @@ public class ImageService {
         imageRepository.save(image);
     }
 
-    public Page<Image> getAllSoftDeletedImages(int page, int size) {
+    public Page<ImageDTO> getAllSoftDeletedImages(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-        return imageRepository.findAllByDeletedTrue(pageable);
+
+        return imageRepository.findAllByDeletedTrue(pageable)
+                .map(ImageDTO::from);
     }
 
 }
