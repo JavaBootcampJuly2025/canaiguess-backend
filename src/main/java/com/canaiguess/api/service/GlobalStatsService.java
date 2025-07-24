@@ -55,18 +55,13 @@ public class GlobalStatsService
                 ? (double) hardestImage.getCorrect() / hardestImage.getTotal()
                 : 0.0;
 
-        // Total hints taken - sum all `signs` lists in ModelGuess
-        int totalHintsTaken = modelGuessRepository.findAll().stream()
-                .mapToInt(mg -> mg.getSigns() != null ? mg.getSigns().size() : 0)
-                .sum();
-
         return GlobalStatsDTO.builder()
                 .totalImages(totalImages)
                 .globalAccuracy(globalAccuracy)
                 .totalUsers((int) totalUsers)
                 .hardestImageId(hardestImageId)
+                .hardestImageUrl(hardestImage.getUrl())
                 .hardestImageAccuracy(hardestImageAccuracy)
-                .totalHintsTaken(totalHintsTaken)
                 .totalGamesPlayed(totalGamesPlayed)
                 .build();
     }
