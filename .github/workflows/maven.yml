@@ -13,12 +13,7 @@ jobs:
     permissions:
       contents: read
       packages: write  # Required to push to GHCR
-
-    env:
-      DB_URL: ${{ secrets.DB_URL }}
-      DB_USERNAME: ${{ secrets.DB_USERNAME }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-
+      
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
