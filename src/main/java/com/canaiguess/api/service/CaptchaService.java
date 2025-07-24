@@ -15,12 +15,18 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class CaptchaService {
     // Google reCAPTCHA verification endpoint
-    private static final String VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
+    //private static final String VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
 
     private final String secretKey;
 
     public CaptchaService(@Value("${captcha.secret}") String secretKey) {
         this.secretKey = secretKey;
+    }
+
+
+    // Extracted for easier testability
+    public String getVerificationUrl() {
+        return "https://www.google.com/recaptcha/api/siteverify";
     }
 
     /**
@@ -42,7 +48,7 @@ public class CaptchaService {
 
         try {
             // Send POST request to Google reCAPTCHA siteverify
-            String response = restTemplate.postForObject(VERIFY_URL, params, String.class);
+            String response = restTemplate.postForObject(getVerificationUrl(), params, String.class);
             JsonNode rootNode = mapper.readTree(response);
             boolean success = rootNode.path("success").asBoolean(false);
             captchaResponse.setSuccess(success);
