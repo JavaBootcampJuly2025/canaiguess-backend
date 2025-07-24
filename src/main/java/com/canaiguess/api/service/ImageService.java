@@ -3,9 +3,11 @@ package com.canaiguess.api.service;
 import com.canaiguess.api.model.Image;
 import com.canaiguess.api.repository.ImageRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +31,9 @@ public class ImageService {
         imageRepository.save(image);
     }
 
-    public List<Image> getAllSoftDeletedImages() {
-        return imageRepository.findAllDeleted();
+    public Page<Image> getAllSoftDeletedImages(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        return imageRepository.findAllByDeletedTrue(pageable);
     }
+
 }

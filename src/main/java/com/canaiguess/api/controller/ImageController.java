@@ -13,14 +13,11 @@ import com.canaiguess.api.service.R2UploadService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.util.List;
 
 @RestController
 @RequestMapping("api/image")
@@ -89,8 +86,11 @@ public class ImageController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/deleted")
     @Operation(summary = "List soft-deleted images (ADMIN)")
-    public ResponseEntity<List<Image>> getDeletedImages() {
-        return ResponseEntity.ok(imageService.getAllSoftDeletedImages());
+    public ResponseEntity<Page<Image>> getDeletedImages(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        return ResponseEntity.ok(imageService.getAllSoftDeletedImages(page, size));
     }
 
 }
