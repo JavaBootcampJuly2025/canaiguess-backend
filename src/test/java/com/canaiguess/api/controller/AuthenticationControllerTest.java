@@ -28,7 +28,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         excludeFilters = @ComponentScan.Filter(
                 type = FilterType.ASSIGNABLE_TYPE,
                 classes = JwtAuthenticationFilter.class
-        ))
+        )
+)
 @AutoConfigureMockMvc(addFilters = false) // Disables Spring Security filters
 public class AuthenticationControllerTest {
 
