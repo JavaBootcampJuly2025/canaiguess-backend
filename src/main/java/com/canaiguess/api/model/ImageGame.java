@@ -11,7 +11,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ImageGame {
+public class ImageGame
+{
 
     @Id
     @GeneratedValue
@@ -35,6 +36,4 @@ public class ImageGame {
         this.batchNumber = batchNumber;
         this.userGuessedCorrectly = false; // default value
     }
-
-
 }

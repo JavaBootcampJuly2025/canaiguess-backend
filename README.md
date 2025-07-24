@@ -1,124 +1,255 @@
-# canaiguess backend
+![Java](https://img.shields.io/badge/Java-21-blue)
+![Spring Boot](https://img.shields.io/badge/Spring--Boot-3.2-green)
+![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-blue)
+![Cloudflare R2](https://img.shields.io/badge/Object%20Storage-R2-orange)
+![Docker](https://img.shields.io/badge/Docker-ready-blue)
+![CI](https://img.shields.io/github/actions/workflow/status/JavaBootcampJuly2025/canaiguess-backend/maven.yml?label=build)
+![Open Issues](https://img.shields.io/github/issues/JavaBootcampJuly2025/canaiguess-backend)
+![Contributors](https://img.shields.io/github/contributors/JavaBootcampJuly2025/canaiguess-backend)
+![License](https://img.shields.io/badge/License-MIT-lightgrey)
+![Last Commit](https://img.shields.io/github/last-commit/JavaBootcampJuly2025/canaiguess-backend)
+![Render](https://img.shields.io/badge/Render-Live-blueviolet)
+![Netlify](https://img.shields.io/badge/Deployed%20on-Netlify-success)
 
-canaiguess is a backend for an interactive game where players try to determine:  
+# CANAIGUESS Backend
+
+CANAIGUESS is a Backend API for an interactive game where players try to determine:  
 **Was this image made by AI, or is it real?**
 
-Players can try different game modes:
-1. Single image: Guess if it’s real or AI
-2. Pair: Which is which? (one real, one fake)
-3. Multiple images: Which ones are AI?
+## 📚 Table of Contents
+- [Backend Stack](#backend-stack)
+- [Frontend Project](#frontend-project)
+- [Run with Docker Compose](#option-a-run-with-docker-compose)
+- [Run with Docker Image](#option-b-run-with-docker-image)
+- [API Endpoints](#api-endpoints)
 
-Leaderboards for signed-in users keep things competitive and fun!
-Users can also get hints for any inage with the help of Gemini API.
+Players can try different game modes depending both on the number of rounds and batch size for each round:
+1. Single image: is it real or AI?
+2. Pair of images: which is which? (one real, one fake)
+3. Multiple images: how many are AI?
+
+> “Can you _really_ spot the difference between real and AI anymore?”
+
+- Algorithm selects unseen images depending on chosen difficulty
+- Users can **get AI hints** for any image with the help of Gemini API
+- Leaderboard and points for authorized users keep things competitive
+- Global statistics on the most challenging images for both users and AI
+- Admins can upload their own images and manage user profiles
+- Unauthorized users can play the game after passing CAPTCHA
+
+*Data from the game could be valuable for researchers working on human-AI perception, dataset labeling, or even training new AI-detection models.*
+
+We use [this public dataset](https://www.kaggle.com/datasets/tristanzhang32/ai-generated-images-vs-real-images?select=test) from Kaggle to provide real and AI-generated images. 
 
 ---
 
-## **Frontend Project**
-
-The frontend for canaiguess is built with **React** and **Vite** is in [canaiguess-frontend repository](https://github.com/JavaBootcampJuly2025/canaiguess-frontend)  
-
----
-
-## **Backend Stack**
+## [**Backend Stack**](#backend-stack)
 
 - **Framework:** Spring Boot
 - **Build Tool:** Maven
+  - Spring Data JPA
+  - Docker Compose
+  - Project Lombok
+  - ((see [`pom.xml`](./pom.xml)))
 - **Database:** PostgreSQL
+- **Security:**
+  - CAPTCHA for guest users
+  - JWT-based authentication
+- **Object Storage:** Cloudflare R2
+- **External APIs / SDKs**:
+  - Google Gemini 
+  - AWS SDK (S3-compatible R2)
+
+Deployed with Render from Github image registry
 
 ---
 
-Database logic model:
+## [**Frontend Project**](#frontend-project)
+
+The frontend for canaiguess is built with **React** and **Vite**
+
+Deployed with Netlify from [canaiguess-frontend repository](https://github.com/JavaBootcampJuly2025/canaiguess-frontend)  
+
+---
+
+Database logical model:
 
 <img src="https://github.com/user-attachments/assets/87d49fab-e36c-45d3-8c1e-09dc41faf086" />
 
-App flowchart schema:
+Application flowchart schema:
 
 <img src="https://github.com/user-attachments/assets/211fff08-5cf4-4fb0-9a70-552ebc0ca02b" />
 
-## Dataset
+---
 
-We use [this](https://www.kaggle.com/datasets/tristanzhang32/ai-generated-images-vs-real-images?select=test) public dataset from Kaggle to provide real and AI-generated images. 
-- Image Storage: Cloudflare R2
-- Database Hosting: Supabase
+## [Option A: Run with Docker Compose](#option-a-run-with-docker-compose)
 
-## **Potential Features**
+```bash
+docker compose up --build
+```
 
-- Registered users can upload their own images or try to “find an AI equivalent” of a real image (by matching labels or using a free AI generation API in the background)
-- Users can challenge each other to solve their custom levels
-- Real-time competitive games with friends
-- Show how “difficult” an image is (“only 9% of users guessed correctly!”). Tag images with difficulty level based on historical guess data.
-- Let users see which images fooled them and others the most
+*Ensure you have a valid `.env` file in the root directory:*
+
+```env
+# get your own
+JWT_SECRET=
+GOOGLE_API_KEY=
+CAPTCHA_SECRET_KEY=
+
+# this is fair
+DB_NAME=canaiguess
+DB_USERNAME=canaiguess
+DB_PASSWORD=canaiguess
+DB_URL=jdbc:postgresql://db:5432/canaiguess
+
+# get in touch
+CLOUDFLARE_R2_ACCESS_KEY=
+CLOUDFLARE_R2_SECRET_KEY=
+CLOUDFLARE_R2_BUCKET_NAME=
+CLOUDFLARE_R2_ENDPOINT=
+```
 
 ---
 
-## **“Can you _really_ spot the difference between real and AI anymore?”**
-
-Data from the game could be valuable for researchers working on human-AI perception, dataset labeling, or even training new AI-detection models.
-
----
-
-## **Game Security**
-
-- CAPTCHA for unauthenticated users
-- JWT-based authentication
-
-## Running the Backend with Docker
+## [Option B: Run with Docker Image](#option-b-run-with-docker-image)
 
 ### Step 1: Authenticate with GitHub Container Registry
-```
+```bash
 echo YOUR_GITHUB_PAT | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
 ```
 
-### Step 2: Pull the Image
-```
-docker pull ghcr.io/javabootcampjuly2025/canaiguess-backend/canaiguess:<IMAGE_TAG>
-```
+### Step 2: Create a .env File
 
-*Replace <IMAGE_TAG> with the specific version.*
-  
-### Step 3: Create a .env File
+Create a `.env` file in the same directory where you’ll run Docker (refer to Option A).
 
-Create a .env file in the same directory where you’ll run Docker. Contact any team member for required .env fields.
+### Step 3: Run the Container
+```bash
+docker run --env-file .env -p 8080:8080 ghcr.io/javabootcampjuly2025/canaiguess-backend/canaiguess:latest
 ```
-DB_URL=
-DB_USERNAME=
-DB_PASSWORD=
-JWT_SECRET=
-GOOGLE_API_KEY=
-```
-
-### Step 4: Run the Container
-```
-docker run --env-file .env -p 8080:8080 ghcr.io/javabootcampjuly2025/canaiguess-backend/canaiguess:<IMAGE_TAG>
-```
-
-<!-- START API DOCS -->
-
-## API Endpoints
 
 You can view and interact with the API using Swagger UI:
 ```
 http://localhost:8080/swagger-ui/index.html
 ```
 
-<img width="653" height="552" alt="attels" src="https://github.com/user-attachments/assets/23653b43-c5ea-44a8-859e-4e543a5fecba" />
+---
 
-RegisterRequest: username, email, password
+## [API Endpoints](#api-endpoints)
 
-AuthenticationResponse: token
+[Swagger UI](https://canaiguess.onrender.com/swagger-ui/index.html)
 
-NewGameRequestDTO: batchCount, batchSize, difficulty
+---
 
-GameResultsDTO: correct, incorrect, accuracy, score
+<details>
+<summary><strong>📦 API Data Transfer Objects]</strong></summary>
 
-GuessRequestDTO: guesses: boolean[]
+<br/>
 
-GuessResultDTO: correct: boolean[]
+### 🧾 Authentication
 
-ImageBatchResponseDTO: images: string[]
+#### `RegisterRequest`
+- `username` — `string`
+- `email` — `string`
+- `password` — `string`
 
-LeaderboardDTO: username, score
+#### `AuthenticationRequest`
+- `username` — `string` 
+- `password` — `string` 
 
-GameInfoResponseDTO: batchCount, batchSize, currentBatch, difficulty
+#### `AuthenticationResponse`
+- `token` — `string`
+- `username` — `string`
+- `role` — `string` 
 
-<!-- END API DOCS -->
+---
+
+### 🎮 Game
+
+#### `NewGameRequestDTO`
+- `batchCount` — `integer`
+- `batchSize` — `integer`
+- `difficulty` — `integer`
+
+#### `NewGameResponseDTO`
+- `gameId` — `string`
+
+#### `GuessRequestDTO`
+- `guesses` — `boolean[]`
+
+#### `GuessResultDTO`
+- `correct` — `boolean[]`
+
+#### `ImageBatchResponseDTO`
+- `images` — `ImageDTO[]`
+
+#### `ImageDTO`
+- `id` — `string`
+- `url` — `string`
+
+#### `GameDTO`
+- `id` — `string`
+- `correct` — `integer`
+- `total` — `integer`
+- `accuracy` — `double`
+- `score` — `integer`
+- `createdAt` — `string`
+- `finished` — `boolean`
+- `currentBatch` — `integer`
+- `batchCount` — `integer`
+- `batchSize` — `integer`
+- `difficulty` — `integer`
+
+---
+
+### 👤 User
+
+#### `UserDTO`
+- `username` — `string`
+- `score` — `integer`
+- `accuracy` — `number (double)`
+- `totalGuesses` — `integer`
+- `correctGuesses` — `integer`
+- `totalGames` — `integer`
+
+#### `UpdateUserRequestDTO`
+- `currentPassword` — `string`
+- `newPassword` — `string` 
+- `email` — `string` 
+
+---
+
+### 🖼️ Image
+
+#### `UploadImageRequestDTO`
+- `file` — `binary` 
+- `fake` — `boolean` 
+
+#### `HintResponseDTO`
+- `fake` — `boolean`
+- `signs` — `string[]`
+---
+
+### 🚨 Reporting
+
+#### `SubmitReportRequestDTO`
+- `description` — `string`
+
+#### `ImageReportResponseDTO`
+- `reportId` — `integer`
+- `imageId` — `string`
+- `imageUrl` — `string`
+- `username` — `string`
+- `description` — `string`
+- `timestamp` — `string` 
+- `resolved` — `boolean`
+
+---
+
+### 📊 Leaderboard
+
+#### maps to `UserDTO`
+
+</details>
+
+---
+💡 Built as part of the [Java Bootcamp July 2025](https://github.com/JavaBootcampJuly2025)

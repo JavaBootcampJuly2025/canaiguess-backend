@@ -1,6 +1,7 @@
 package com.canaiguess.api.service;
 
 import com.canaiguess.api.dto.HintResponseDTO;
+import com.canaiguess.api.exception.ModelGuessStorageException;
 import com.canaiguess.api.model.ModelGuess;
 import com.canaiguess.api.repository.ModelGuessRepository;
 import jakarta.transaction.Transactional;
@@ -30,7 +31,9 @@ public class ModelGuessService {
             return CompletableFuture.completedFuture(null);
         } catch (Exception e) {
             CompletableFuture<Void> failed = new CompletableFuture<>();
-            failed.completeExceptionally(e);
+            failed.completeExceptionally(
+                    new ModelGuessStorageException("Failed to store model guess for image: " + imageUrl, e)
+            );
             return failed;
         }
     }

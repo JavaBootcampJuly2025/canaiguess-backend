@@ -1,6 +1,7 @@
 package com.canaiguess.api.controller;
 
 import com.canaiguess.api.dto.*;
+import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.service.GameService;
 import com.canaiguess.api.service.GameSessionService;
@@ -40,14 +41,13 @@ public class GameController {
 
     @PreAuthorize("hasRole('ADMIN') or @gameSecurity.isOwner(#gameId, authentication)")
     @GetMapping("/{gameId}")
-    @Operation(summary = "Get game details by ID")
-    public ResponseEntity<GameInfoResponseDTO> getGameById(@PathVariable String gameId) {
-        GameInfoResponseDTO game = gameService.getGameByPublicId(gameId);
-        if (game != null) {
-            return ResponseEntity.ok(game);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    @Operation(summary = "Get full game info (metadata + results)")
+    public ResponseEntity<GameDTO> getGameById(
+            @PathVariable String gameId,
+            @AuthenticationPrincipal User user
+    ) {
+        GameDTO game = gameService.getGameByPublicId(gameId, user);
+        return ResponseEntity.ok(game);
     }
 
     @PreAuthorize("hasRole('ADMIN') or @gameSecurity.isOwner(#gameId, authentication)")
@@ -73,18 +73,7 @@ public class GameController {
         return ResponseEntity.ok(new GuessResultDTO(results));
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @gameSecurity.isOwner(#gameId, authentication)")
-    @PostMapping("/{gameId}/results")
-    @Operation(
-            summary = "Get results for a game",
-            description = "Returns the number of correct and incorrect guesses for the game"
-    )
-    public ResponseEntity<GameResultsDTO> getGameResults(
-            @PathVariable String gameId,
-            @AuthenticationPrincipal User user
-    ) {
-        GameResultsDTO results = gameService.getGameResults(gameId, user);
-        return ResponseEntity.ok(results);
-    }
+
+
 
 }

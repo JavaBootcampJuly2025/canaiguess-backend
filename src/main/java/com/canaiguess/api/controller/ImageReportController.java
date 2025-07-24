@@ -1,7 +1,6 @@
 package com.canaiguess.api.controller;
 
 import com.canaiguess.api.dto.ImageReportTO;
-import com.canaiguess.api.model.ImageReport;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.service.ImageReportService;
 import io.swagger.v3.oas.annotations.Operation;

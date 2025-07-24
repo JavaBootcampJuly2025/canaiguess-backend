@@ -1,5 +1,6 @@
 package com.canaiguess.api.service;
 
+import com.canaiguess.api.exception.GameDataIncompleteException;
 import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.Image;
 import com.canaiguess.api.model.ImageGame;
@@ -48,7 +49,7 @@ public class ImageAllocatorService {
 
         // all images should have fallen within the previous three groups
         if (selected.size() < totalNeeded) {
-            throw new IllegalStateException("Not enough images to create a game.");
+            throw new GameDataIncompleteException("Not enough images to create a game.");
         }
 
         Collections.shuffle(selected);
@@ -79,15 +80,21 @@ public class ImageAllocatorService {
         List<Image> fakeImages = fetchImagesByFakeness(game, true, batchCount, targetDifficulty);
 
         if (realImages.size() < batchCount || fakeImages.size() < batchCount) {
-            throw new IllegalStateException("Not enough real/fake images to create paired batches.");
+            throw new GameDataIncompleteException("Not enough real/fake images to create paired batches.");
         }
 
         Collections.shuffle(realImages);
         Collections.shuffle(fakeImages);
 
         for (int batch = 1; batch <= batchCount; batch++) {
-            imageGameRepository.save(new ImageGame(game, realImages.get(batch - 1), batch));
-            imageGameRepository.save(new ImageGame(game, fakeImages.get(batch - 1), batch));
+            Image real = realImages.get(batch - 1);
+            Image fake = fakeImages.get(batch - 1);
+
+            List<Image> pair = new ArrayList<>(List.of(real, fake));
+            Collections.shuffle(pair); // randomize order of real & fake
+
+            imageGameRepository.save(new ImageGame(game, pair.get(0), batch));
+            imageGameRepository.save(new ImageGame(game, pair.get(1), batch));
         }
     }
 

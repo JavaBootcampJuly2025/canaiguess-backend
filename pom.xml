@@ -27,16 +27,6 @@
 		<url/>
 	</scm>
 
-<!--	<repositories>-->
-<!--		<repository>-->
-<!--			<id>google-ai</id>-->
-<!--			<url>https://maven.pkg.dev/ai-generativelanguage/java</url>-->
-<!--			<releases>-->
-<!--				<enabled>true</enabled>-->
-<!--			</releases>-->
-<!--		</repository>-->
-<!--	</repositories>-->
-
 	<properties>
 		<java.version>21</java.version>
 	</properties>
@@ -96,6 +86,13 @@
 			<groupId>com.google.genai</groupId>
 			<artifactId>google-genai</artifactId>
 			<version>1.0.0</version>
+		</dependency>
+
+		<!--R2 Object storage SDK -->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
+			<version>2.25.20</version>
 		</dependency>
 
 		<!-- Add explicitly the correct version -->

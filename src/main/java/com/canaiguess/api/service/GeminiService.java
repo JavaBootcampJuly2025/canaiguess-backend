@@ -1,12 +1,16 @@
 package com.canaiguess.api.service;
 
 import com.canaiguess.api.dto.HintResponseDTO;
+import com.canaiguess.api.exception.GeminiModelException;
+import com.canaiguess.api.exception.InvalidHintResponseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.genai.Client;
 import com.google.genai.types.Content;
 import com.google.genai.types.GenerateContentResponse;
 import com.google.genai.types.Part;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 
@@ -17,13 +21,14 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 
+@Slf4j
 @Service
 public class GeminiService {
 
     private final ModelGuessService modelGuessService;
     private Client client;
 
-    private  static final List<String> models = List.of(
+    private static final List<String> models = List.of(
             "gemini-2.5-flash",
             "gemini-2.0-flash-lite",
             "gemini-2.0-flash",
@@ -32,14 +37,14 @@ public class GeminiService {
     );
 
     private static final String PROMPT_TEXT = """
-        Analyze the image. Is it AI-generated? Give 2–5 brief visual clues or signs. Be factual. Return a JSON response like:
-        {
-          "fake": true|false,
-          "signs": ["reason 1", "reason 2", ...]
-        }
-        Only include 2–5 short (each maximum 20-words) visual signs or clues.
-        Do NOT return anything outside the JSON object.
-    """;
+                Analyze the image. Is it AI-generated? Give 2–5 brief visual clues or signs. Be factual. Return a JSON response like:
+                {
+                  "fake": true|false,
+                  "signs": ["reason 1", "reason 2", ...]
+                }
+                Only include 2–5 short (each maximum 20-words) visual signs or clues.
+                Do NOT return anything outside the JSON object.
+            """;
 
     public GeminiService(ModelGuessService modelGuessService) {
         this.modelGuessService = modelGuessService;
@@ -51,50 +56,65 @@ public class GeminiService {
     }
 
     public HintResponseDTO analyzeImagePrompt(String imageUrl) {
-        try {
-            byte[] imageBytes = fetchBytesFromUrl(imageUrl);
-
-            Content input = Content.fromParts(
-                    Part.fromText(PROMPT_TEXT),
-                    Part.fromBytes(imageBytes, "image/jpeg")
-            );
-
-            ObjectMapper mapper = new ObjectMapper();
-            HintResponseDTO dto = null;
-
-            for (String model : models) {
-                try {
-                    GenerateContentResponse resp = client.models.generateContent(model, input, null);
-                    if (resp == null || resp.text() == null) continue;
-
-                    String json = extractJsonFromText(resp.text());
-                    JsonNode root = mapper.readTree(json);
-
-                    validateJsonResponse(root);
-                    dto = mapper.treeToValue(root, HintResponseDTO.class);
-                    break; // success
-
-                } catch (Exception modelError) {
-                    System.err.println("Model " + model + " failed: " + modelError.getMessage());
-                    // continue to try next model
-                }
-            }
-
-            if (dto == null) {
-                throw new RuntimeException("All Gemini models failed or returned invalid responses.");
-            }
-
-            modelGuessService.storeModelGuessAsync(imageUrl, dto)
-                .exceptionally(ex -> {
-                    System.err.println("Failed to store model guess: {}" + ex.getMessage());
-                    return null;
-                });
-
-            return dto;
-
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to analyze image: " + e.getMessage(), e);
+        if (imageUrl == null || imageUrl.isBlank()) {
+            throw new IllegalArgumentException("Image URL must not be null or blank.");
         }
+
+        byte[] imageBytes;
+
+        try {
+            imageBytes = fetchBytesFromUrl(imageUrl);
+        } catch (IOException | InterruptedException ex) {
+            throw new GeminiModelException("Failed to fetch image bytes from URL.", ex);
+        }
+
+        Content input = Content.fromParts(
+                Part.fromText(PROMPT_TEXT),
+                Part.fromBytes(imageBytes, "image/jpeg")
+        );
+
+        ObjectMapper mapper = new ObjectMapper();
+        HintResponseDTO dto = null;
+
+        for (String model : models) {
+            try {
+                GenerateContentResponse resp = client.models.generateContent(model, input, null);
+                if (resp == null || resp.text() == null) continue;
+
+                String json = extractJsonFromText(resp.text());
+                JsonNode root;
+                try {
+                    root = mapper.readTree(json);
+                } catch (JsonProcessingException ex) {
+                    throw new InvalidHintResponseException("Malformed JSON from Gemini model: " + json, ex);
+                }
+
+                validateJsonResponse(root);
+                dto = mapper.treeToValue(root, HintResponseDTO.class);
+                break; // success
+
+            } catch (InvalidHintResponseException | IllegalArgumentException e) {
+                // known validation failure, try next model
+                log.info("Model {} returned invalid data: {}", model, e.getMessage());
+            } catch (Exception modelError) {
+                // JsonProcessingException | IllegalArgumentException
+                log.info("Model {} failed: {}", model, modelError.getMessage());
+                // continue to try next model
+            }
+        }
+
+        if (dto == null) {
+            throw new GeminiModelException("All Gemini models failed or returned invalid responses.");
+        }
+
+        modelGuessService.storeModelGuessAsync(imageUrl, dto)
+            .exceptionally(ex -> {
+                log.info("Failed to store model guess: {}", ex.getMessage());
+                return null;
+            });
+
+        return dto;
+
     }
 
     private byte[] fetchBytesFromUrl(String url) throws IOException, InterruptedException {
@@ -117,21 +137,21 @@ public class GeminiService {
 
     private void validateJsonResponse(JsonNode root) {
         if (!root.has("fake") || !root.get("fake").isBoolean()) {
-            throw new IllegalArgumentException("Missing or invalid 'fake' field.");
+            throw new InvalidHintResponseException("Missing or invalid 'fake' field.");
         }
 
         if (!root.has("signs") || !root.get("signs").isArray()) {
-            throw new IllegalArgumentException("Missing or invalid 'signs' field.");
+            throw new InvalidHintResponseException("Missing or invalid 'signs' field.");
         }
 
         var signs = root.get("signs");
         if (signs.size() < 2 || signs.size() > 5) {
-            throw new IllegalArgumentException("Invalid number of 'signs' elements.");
+            throw new InvalidHintResponseException("Invalid number of 'signs' elements.");
         }
 
         for (JsonNode sign : signs) {
             if (!sign.isTextual() || sign.asText().trim().isEmpty()) {
-                throw new IllegalArgumentException("Empty 'sign' string encountered.");
+                throw new InvalidHintResponseException("Empty 'sign' string encountered.");
             }
         }
     }

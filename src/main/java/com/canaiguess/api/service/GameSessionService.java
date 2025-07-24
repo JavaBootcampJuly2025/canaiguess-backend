@@ -1,6 +1,8 @@
 package com.canaiguess.api.service;
 
 import com.canaiguess.api.dto.ImageDTO;
+import com.canaiguess.api.exception.GameDataIncompleteException;
+import com.canaiguess.api.exception.UnauthorizedAccessException;
 import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.Image;
 import com.canaiguess.api.model.ImageGame;
@@ -34,33 +36,38 @@ public class GameSessionService {
 
     public List<Boolean> validateGuesses(String gameId, User user, List<Boolean> guesses) {
         Game game = gameRepository.findByPublicId(gameId)
-                .orElseThrow(() -> new RuntimeException("Game not found"));
+                .orElseThrow(() -> new GameDataIncompleteException("Game not found by gameId: " + gameId));
 
-        if (!game.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Unauthorized access to game");
+        if (game.getUser() != null && !game.getUser().getId().equals(user.getId())) {
+            throw new UnauthorizedAccessException("Unauthorized access to the game");
         }
 
         int batch = game.getCurrentBatch();
-
         List<ImageGame> imageGames = imageGameRepository.findByGameAndBatchNumber(game, batch);
 
+        if (guesses == null || guesses.isEmpty()) {
+            throw new GameDataIncompleteException("No guesses provided for validation.");
+        }
         if (imageGames.size() != guesses.size()) {
-            throw new RuntimeException("Mismatched guesses and images in batch");
+            throw new GameDataIncompleteException("Mismatched guesses and images in batch");
         }
 
         List<Boolean> correct = new ArrayList<>();
+        int correctCount = 0;
+
         for (int i = 0; i < imageGames.size(); i++) {
             ImageGame ig = imageGames.get(i);
             Image image = ig.getImage();
             boolean userGuess = guesses.get(i);
             boolean isAI = image.isFake();
 
-            // stats update
             image.setTotal(image.getTotal() + 1);
+
             if (userGuess == isAI) {
                 image.setCorrect(image.getCorrect() + 1);
                 ig.setUserGuessedCorrectly(true);
                 correct.add(true);
+                correctCount++;
             } else {
                 ig.setUserGuessedCorrectly(false);
                 correct.add(false);
@@ -70,36 +77,38 @@ public class GameSessionService {
             imageGameRepository.save(ig);
         }
 
+        // Update derived stats on game
+        game.setCorrectGuesses(game.getCorrectGuesses() + correctCount);
+        game.setTotalGuesses(game.getTotalGuesses() + guesses.size());
         game.setCurrentBatch(batch + 1);
-
-        // if this was the final batch, finish and score
-        if (batch == game.getBatchCount()) {
-            scoringService.updateUserPoints(game);
-            game.setFinished(true);
-        }
-
         gameRepository.save(game);
+
+        // score game after final batch
+        if (batch == game.getBatchCount()) {
+            scoringService.updateScore(game);
+        }
 
         return correct;
     }
 
+
     public List<ImageDTO> getNextBatchForGame(String gameId, User user) {
         Game game = gameRepository.findByPublicId(gameId)
-                .orElseThrow(() -> new RuntimeException("Game not found"));
+                .orElseThrow(() -> new GameDataIncompleteException("Game not found by publicId: " + gameId));
 
-        if (!game.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Unauthorized access to game");
+        if (game.getUser() != null && !game.getUser().getId().equals(user.getId())) {
+            throw new UnauthorizedAccessException("Unauthorized access to the game");
         }
 
         if (game.isFinished()) {
-            throw new RuntimeException("Game is already finished");
+            throw new GameDataIncompleteException("Game is already finished!");
         }
 
         int currentBatch = game.getCurrentBatch();
         List<ImageGame> imageGames = imageGameRepository.findByGameAndBatchNumber(game, currentBatch);
 
         if (imageGames.isEmpty()) {
-            throw new RuntimeException("No images found for current batch");
+            throw new GameDataIncompleteException("No images found for current batch");
         }
 
         return imageGames.stream()

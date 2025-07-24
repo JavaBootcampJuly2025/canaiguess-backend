@@ -9,7 +9,7 @@ COPY pom.xml .
 COPY src ./src
 
 # Build the app (creates target/*.jar)
-RUN mvn clean package -DskipTests
+RUN mvn clean package
 
 # ---- Stage 2: Runtime ----
 FROM amazoncorretto:21
