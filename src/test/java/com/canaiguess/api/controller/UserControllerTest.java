@@ -77,8 +77,8 @@ class UserControllerTest {
         }
 
         @Bean
-        public UserService userService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-            return new UserService(userRepository, passwordEncoder);
+        public UserService userService(UserRepository userRepository, PasswordEncoder passwordEncoder, GameRepository gameRepository) {
+            return new UserService(userRepository, passwordEncoder,  gameRepository);
         }
     }
 
