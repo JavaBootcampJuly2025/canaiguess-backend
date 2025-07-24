@@ -8,6 +8,7 @@ import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.ImageRepository;
 import com.canaiguess.api.service.GeminiService;
 import com.canaiguess.api.service.ImageReportService;
+import com.canaiguess.api.service.ImageService;
 import com.canaiguess.api.service.R2UploadService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("api/image")
@@ -30,6 +32,7 @@ public class ImageController {
     private final ImageRepository imageRepository;
     private final ImageReportService imageReportService;
     private final R2UploadService uploadService;
+    private final ImageService imageService;
 
     @Operation(summary = "Get a hint for an image")
     @PostMapping("/{imageId}/hint")
@@ -37,7 +40,7 @@ public class ImageController {
             @PathVariable String imageId,
             @AuthenticationPrincipal User user
     ) {
-        Image image = imageRepository.findByPublicId(imageId)
+        Image image = imageRepository.findByPublicIdAndDeletedFalse(imageId)
                 .orElseThrow(() -> new RuntimeException("Image not found"));
 
         HintResponseDTO result = geminiService.analyzeImagePrompt(image.getUrl());
@@ -67,5 +70,27 @@ public class ImageController {
         return ResponseEntity.ok(url);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{imageId}/delete")
+    @Operation(summary = "Soft delete image (ADMIN)")
+    public ResponseEntity<Void> softDeleteImage(@PathVariable String imageId) {
+        imageService.softDeleteImage(imageId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{imageId}/undelete")
+    @Operation(summary = "Soft undelete image (ADMIN)")
+    public ResponseEntity<Void> undeleteImage(@PathVariable String imageId) {
+        imageService.undeleteImage(imageId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/deleted")
+    @Operation(summary = "List soft-deleted images (ADMIN)")
+    public ResponseEntity<List<Image>> getDeletedImages() {
+        return ResponseEntity.ok(imageService.getAllSoftDeletedImages());
+    }
 
 }

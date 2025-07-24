@@ -13,6 +13,15 @@ import java.util.Optional;
 
 public interface ImageRepository extends JpaRepository<Image, Long> {
 
+    Optional<Image> findByPublicIdAndDeletedFalse(String publicId);
+
+    Optional<Image> findByPublicId(String publicId);
+
+    boolean existsByPublicId(String publicId);
+
+    @Query("SELECT i FROM Image i WHERE i.deleted = true")
+    List<Image> findAllDeleted();
+
     // find images played by no one
     @Query("""
         SELECT i FROM Image i
@@ -24,6 +33,7 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     @Query("""
         SELECT i FROM Image i
         WHERE i.total > 0
+        AND i.deleted = false
         AND i.id NOT IN (
              SELECT ig.image.id
              FROM ImageGame ig
@@ -41,6 +51,7 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     @Query("""
         SELECT i FROM Image i
         WHERE i.total > 0
+        AND i.deleted = false
         AND i.id IN (
              SELECT ig.image.id
              FROM ImageGame ig
@@ -62,6 +73,7 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     @Query("""
         SELECT i FROM Image i
         WHERE i.total > 0 AND i.fake = :isFake
+        AND i.deleted = false
         AND NOT EXISTS (
             SELECT 1 FROM ImageGame ig
             JOIN ig.game g
@@ -80,6 +92,7 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     @Query("""
         SELECT i FROM Image i
         WHERE i.total > 0 AND i.fake = :isFake
+        AND i.deleted = false
         AND EXISTS (
             SELECT 1 FROM ImageGame ig
             JOIN ig.game g
@@ -94,6 +107,4 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
             Pageable pageable
     );
 
-
-    Optional<Image> findByPublicId(String publicId);
 }

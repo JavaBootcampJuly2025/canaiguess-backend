@@ -26,6 +26,9 @@ public class Image {
 
     private int correct; // correct guesses
 
+    @Column(nullable = false)
+    private boolean deleted = false;
+
     @OneToMany(mappedBy = "image", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ImageGame> imageGames;
 

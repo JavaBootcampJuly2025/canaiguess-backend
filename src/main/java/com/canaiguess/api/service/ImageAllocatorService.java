@@ -6,6 +6,7 @@ import com.canaiguess.api.model.Image;
 import com.canaiguess.api.model.ImageGame;
 import com.canaiguess.api.repository.ImageGameRepository;
 import com.canaiguess.api.repository.ImageRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -14,17 +15,11 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ImageAllocatorService {
 
     private final ImageRepository imageRepository;
     private final ImageGameRepository imageGameRepository;
-
-    public ImageAllocatorService(ImageRepository imageRepository,
-                            ImageGameRepository imageGameRepository) {
-
-        this.imageRepository = imageRepository;
-        this.imageGameRepository = imageGameRepository;
-    }
 
     public void allocateImagesForGame(Game game) {
         if (game.getBatchSize() == 2) {

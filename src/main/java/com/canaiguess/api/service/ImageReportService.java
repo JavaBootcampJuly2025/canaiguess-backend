@@ -23,7 +23,7 @@ public class ImageReportService {
     private final ImageRepository imageRepository;
 
     public void submitReport(String imageId, User user, SubmitReportRequestDTO dto) {
-        Image image = imageRepository.findByPublicId(imageId)
+        Image image = imageRepository.findByPublicIdAndDeletedFalse(imageId)
                 .orElseThrow(() -> new GameDataIncompleteException("Image not found with id: " + imageId));
 
         ImageReport report = new ImageReport();
