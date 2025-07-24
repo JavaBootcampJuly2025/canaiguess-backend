@@ -10,6 +10,7 @@ import com.google.genai.Client;
 import com.google.genai.types.Content;
 import com.google.genai.types.GenerateContentResponse;
 import com.google.genai.types.Part;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
@@ -23,9 +24,11 @@ import java.util.List;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class GeminiService {
 
     private final ModelGuessService modelGuessService;
+    private final ObjectMapper mapper;
     private Client client;
 
     private static final List<String> models = List.of(
@@ -45,10 +48,6 @@ public class GeminiService {
                 Only include 2–5 short (each maximum 20-words) visual signs or clues.
                 Do NOT return anything outside the JSON object.
             """;
-
-    public GeminiService(ModelGuessService modelGuessService) {
-        this.modelGuessService = modelGuessService;
-    }
 
     @PostConstruct
     public void init() {
@@ -73,7 +72,6 @@ public class GeminiService {
                 Part.fromBytes(imageBytes, "image/jpeg")
         );
 
-        ObjectMapper mapper = new ObjectMapper();
         HintResponseDTO dto = null;
 
         for (String model : models) {

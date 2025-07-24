@@ -23,5 +23,6 @@ public interface GameRepository extends JpaRepository<Game, Long> {
       FROM Game g
       WHERE g.user.username = :username
     """)
+
     int countGamesByUsername(String username);
 }

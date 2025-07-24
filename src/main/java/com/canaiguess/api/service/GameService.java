@@ -9,20 +9,16 @@ import com.canaiguess.api.exception.UnauthorizedAccessException;
 import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.GameRepository;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class GameService {
 
     private final GameRepository gameRepository;
     private final ImageAllocatorService imageAllocatorService;
-
-    public GameService(GameRepository gameRepository,
-                       ImageAllocatorService imageAllocatorService) {
-        this.imageAllocatorService = imageAllocatorService;
-        this.gameRepository = gameRepository;
-    }
 
     public NewGameResponseDTO createGame(NewGameRequestDTO request, User user) {
 

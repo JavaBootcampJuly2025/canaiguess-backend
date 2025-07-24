@@ -25,7 +25,11 @@ public class R2UploadService {
     private String bucketName;
 
     public String uploadAndSave(MultipartFile file, boolean isFake) {
-        String key = RandomStringUtils.randomAlphanumeric(8).toLowerCase();
+
+        String key;
+        do {
+            key = RandomStringUtils.randomAlphanumeric(8).toLowerCase();
+        } while (imageRepository.existsByPublicId(key));
 
         PutObjectRequest putRequest = PutObjectRequest.builder()
                 .bucket(bucketName)

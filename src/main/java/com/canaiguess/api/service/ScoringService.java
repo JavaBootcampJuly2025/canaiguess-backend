@@ -5,18 +5,15 @@ import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.UserRepository;
 import com.canaiguess.api.repository.GameRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class ScoringService {
 
     private final UserRepository userRepository;
     private final GameRepository gameRepository;
-
-    public ScoringService(UserRepository userRepository, GameRepository gameRepository) {
-        this.userRepository = userRepository;
-        this.gameRepository = gameRepository;
-    }
 
     public void updateScore(Game game) {
         User user = game.getUser();

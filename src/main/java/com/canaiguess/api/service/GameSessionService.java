@@ -10,29 +10,20 @@ import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.GameRepository;
 import com.canaiguess.api.repository.ImageGameRepository;
 import com.canaiguess.api.repository.ImageRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class GameSessionService {
 
     private final ScoringService scoringService;
     private final ImageRepository imageRepository;
     private final ImageGameRepository imageGameRepository;
     private final GameRepository gameRepository;
-
-    public GameSessionService(ImageRepository imageRepository,
-                            ImageGameRepository imageGameRepository,
-                            GameRepository gameRepository,
-                            ScoringService scoringService) {
-
-        this.imageRepository = imageRepository;
-        this.imageGameRepository = imageGameRepository;
-        this.gameRepository = gameRepository;
-        this.scoringService = scoringService;
-    }
 
     public List<Boolean> validateGuesses(String gameId, User user, List<Boolean> guesses) {
         Game game = gameRepository.findByPublicId(gameId)
