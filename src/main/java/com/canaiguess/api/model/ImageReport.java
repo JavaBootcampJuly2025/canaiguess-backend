@@ -22,6 +22,9 @@ public class ImageReport {
     private User user;
 
     @Column
+    private String title;
+
+    @Column
     private String description;
 
     @Column(nullable = false, updatable = false)

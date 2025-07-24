@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SubmitReportRequestDTO {
     private String description;
+    private String title;
 }

@@ -48,10 +48,10 @@ public class ImageController {
     @PostMapping("/{imageId}/report")
     public ResponseEntity<Void> reportImage(
             @PathVariable String imageId,
-            @RequestBody SubmitReportRequestDTO request,
+            @RequestBody SubmitReportRequestDTO dto,
             @AuthenticationPrincipal User user
     ) {
-        imageReportService.submitReport(imageId, user, request.getDescription());
+        imageReportService.submitReport(imageId, user, dto);
         return ResponseEntity.noContent().build();
 
     }
