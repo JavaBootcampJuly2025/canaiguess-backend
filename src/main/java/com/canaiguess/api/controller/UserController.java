@@ -9,6 +9,7 @@ import com.canaiguess.api.service.UserStatsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -60,6 +61,22 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/{username}/promote")
+    @Operation(summary = "Promote user to admin", description = "Grants admin role to a specified user (ADMIN only)")
+    public ResponseEntity<Void> promoteToAdmin(@PathVariable String username,
+                                               @AuthenticationPrincipal User actingUser) {
+        userService.promoteUserToAdmin(actingUser, username);
+        return ResponseEntity.noContent().build();
+    }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/all")
+    @Operation(summary = "Get paginated list of users", description = "Returns all users with pagination (ADMIN only)")
+    public ResponseEntity<Page<UserDTO>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(userService.getAllUsersPaginated(page, size));
+    }
 
 }

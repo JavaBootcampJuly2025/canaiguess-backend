@@ -1,5 +1,6 @@
 package com.canaiguess.api.dto;
 
+import com.canaiguess.api.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,9 +11,25 @@ import lombok.Data;
 public class UserDTO
 {
     private String username;
-    private int score;           // total points
+    private Integer score;           // total points
     private Double accuracy;     // avg accuracy
-    private int totalGuesses;    // all guesses ever
-    private int correctGuesses;  // all correct guesses ever
-    private int totalGames;      // total games played
+    private Integer totalGuesses;    // all guesses ever
+    private Integer correctGuesses;  // all correct guesses ever
+    private Integer totalGames;      // total games played
+
+    public static UserDTO from(User user, Integer totalGames) {
+        double accuracy = user.getTotalGuesses() > 0
+            ? (double) user.getCorrectGuesses() / user.getTotalGuesses()
+            : 0.0;
+
+        return UserDTO.builder()
+            .username(user.getUsername())
+            .score(user.getScore())
+            .accuracy(accuracy)
+            .totalGuesses(user.getTotalGuesses())
+            .correctGuesses(user.getCorrectGuesses())
+            .totalGames(totalGames)
+            .build();
+    }
+
 }
