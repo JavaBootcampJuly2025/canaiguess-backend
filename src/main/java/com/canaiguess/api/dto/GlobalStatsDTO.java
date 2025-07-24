@@ -12,7 +12,6 @@ public class GlobalStatsDTO
     private int totalImages;
     private double globalAccuracy;
     private int totalUsers;
-    private String hardestImageId;
     private String hardestImageUrl;
     private double hardestImageAccuracy;
     private int totalHintsTaken;

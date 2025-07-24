@@ -31,8 +31,8 @@ public class GlobalStatsService
         this.gameRepository = gameRepository;
     }
 
-    public GlobalStatsDTO getGlobalStats()
-    {
+    public GlobalStatsDTO getGlobalStats() {
+
         int totalImages = (int) imageRepository.count();
         long totalUsers = userRepository.count();
         long totalGamesPlayed = gameRepository.count();
@@ -50,7 +50,6 @@ public class GlobalStatsService
                 .min(Comparator.comparingDouble(img -> (double) img.getCorrect() / img.getTotal()))
                 .orElse(null);
 
-        String hardestImageId = hardestImage != null ? hardestImage.getPublicId() : null;
         double hardestImageAccuracy = hardestImage != null && hardestImage.getTotal() > 0
                 ? (double) hardestImage.getCorrect() / hardestImage.getTotal()
                 : 0.0;
@@ -59,10 +58,9 @@ public class GlobalStatsService
                 .totalImages(totalImages)
                 .globalAccuracy(globalAccuracy)
                 .totalUsers((int) totalUsers)
-                .hardestImageId(hardestImageId)
-                .hardestImageUrl(hardestImage.getUrl())
+                .hardestImageUrl(hardestImage != null ? hardestImage.getUrl() : "")
                 .hardestImageAccuracy(hardestImageAccuracy)
                 .totalGamesPlayed(totalGamesPlayed)
                 .build();
-    }
+        }
 }
