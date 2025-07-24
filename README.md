@@ -11,7 +11,7 @@ Players can try different game modes:
 Leaderboards for signed-in users keep things competitive and fun!
 Users can also get hints for any inage with the help of Gemini API.
 
----
+----
 
 ## **Frontend Project**
 
