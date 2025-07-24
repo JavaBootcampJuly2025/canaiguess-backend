@@ -90,7 +90,11 @@ docker compose up --build
 
 *Ensure you have a valid `.env` file in the root directory:*
 
-```env
+```
+# imagination
+JWT_SECRET=
+ADMIN_DEFAULT_PASSWORD=
+
 # get your own
 JWT_SECRET=
 GOOGLE_API_KEY=
@@ -120,7 +124,7 @@ echo YOUR_GITHUB_PAT | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-s
 
 ### Step 2: Create a .env File
 
-Create a `.env` file in the same directory where you’ll run Docker (refer to Option A).
+*Create a `.env` file in the same directory where you’ll run Docker (refer to Option A)*
 
 ### Step 3: Run the Container
 ```bash
@@ -131,6 +135,8 @@ You can view and interact with the API using Swagger UI:
 ```
 http://localhost:8080/swagger-ui/index.html
 ```
+
+Login as `admin` with the password specified in `.env` or create a new account.
 
 ---
 
