@@ -1,12 +1,12 @@
 package com.canaiguess.api.service;
 
-import com.canaiguess.api.dto.ImageReportResponseDTO;
+import com.canaiguess.api.dto.ImageReportTO;
+import com.canaiguess.api.dto.SubmitReportRequestDTO;
 import com.canaiguess.api.model.Image;
 import com.canaiguess.api.model.ImageReport;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.ImageReportRepository;
 import com.canaiguess.api.repository.ImageRepository;
-import com.canaiguess.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,29 +18,30 @@ public class ImageReportService {
 
     private final ImageReportRepository imageReportRepository;
     private final ImageRepository imageRepository;
-    private final UserRepository userRepository;
 
-    public void submitReport(String imageId, User user, String description) {
+    public void submitReport(String imageId, User user, SubmitReportRequestDTO dto) {
         Image image = imageRepository.findByPublicId(imageId)
                 .orElseThrow(() -> new IllegalArgumentException("Image not found"));
 
         ImageReport report = new ImageReport();
         report.setImage(image);
         report.setUser(user);
-        report.setDescription(description);
+        report.setDescription(dto.getDescription());
+        report.setTitle(dto.getTitle());
 
         imageReportRepository.save(report);
     }
 
-    public List<ImageReportResponseDTO> getUnresolvedReports() {
+    public List<ImageReportTO> getUnresolvedReports() {
         return imageReportRepository.findByResolvedFalseOrderByTimestampDesc()
             .stream()
-            .map(report -> ImageReportResponseDTO.builder()
+            .map(report -> ImageReportTO.builder()
                     .reportId(report.getId())
                     .imageId(report.getImage().getPublicId())
                     .imageUrl(report.getImage().getUrl())
                     .username(report.getUser().getUsername())
                     .description(report.getDescription())
+                    .title(report.getTitle())
                     .timestamp(report.getTimestamp())
                     .resolved(report.isResolved())
                     .build())

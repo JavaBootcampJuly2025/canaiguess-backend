@@ -1,6 +1,6 @@
 package com.canaiguess.api.controller;
 
-import com.canaiguess.api.dto.ImageReportResponseDTO;
+import com.canaiguess.api.dto.ImageReportTO;
 import com.canaiguess.api.model.ImageReport;
 import com.canaiguess.api.model.User;
 import com.canaiguess.api.service.ImageReportService;
@@ -23,7 +23,7 @@ public class ImageReportController {
 
     @Operation(summary = "List unresolved image reports (ADMIN only)")
     @GetMapping("/unresolved")
-    public List<ImageReportResponseDTO> listUnresolvedReports() {
+    public List<ImageReportTO> listUnresolvedReports() {
         return imageReportService.getUnresolvedReports();
     }
 
