@@ -1,104 +1,111 @@
 package com.canaiguess.api.service;
 
+import com.canaiguess.api.exception.GameDataIncompleteException;
 import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.Image;
 import com.canaiguess.api.model.ImageGame;
 import com.canaiguess.api.repository.ImageGameRepository;
 import com.canaiguess.api.repository.ImageRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ImageAllocatorService {
 
     private final ImageRepository imageRepository;
     private final ImageGameRepository imageGameRepository;
 
-    public ImageAllocatorService(ImageRepository imageRepository,
-                            ImageGameRepository imageGameRepository
-                            ) {
-
-        this.imageRepository = imageRepository;
-        this.imageGameRepository = imageGameRepository;
-    }
-
     public void allocateImagesForGame(Game game) {
+        if (game.getBatchSize() == 2) {
+            // we want pairs of (real, fake)
+            allocateTwoImageBatch(game);
+            return;
+        }
+
         int totalNeeded = game.getBatchCount() * game.getBatchSize();
-        double targetDifficulty = game.getDifficulty() / 100.0; // assume 0-100 input
+        double targetDifficulty = game.getDifficulty() / 100.0;
 
-        // unplayed images for this user
-        List<Image> unplayed = imageRepository.findUnplayedImagesByUser(game.getUser());
-
-        // fresh images (never played by anyone)
-        List<Image> neverPlayedByAnyone = unplayed.stream()
-                .filter(img -> img.getTotal() == 0)
-                .toList();
-
-        // played ones (played by at least someone),
-        // ranked by distance to target difficulty
-        List<Image> playedByOthers = unplayed.stream()
-                .filter(img -> img.getTotal() > 0)
-                .sorted((a, b) -> {
-                    double da = 1.0 - (a.getCorrect() / (double) a.getTotal());
-                    double db = 1.0 - (b.getCorrect() / (double) b.getTotal());
-                    return Double.compare(Math.abs(da - targetDifficulty), Math.abs(db - targetDifficulty));
-                })
-                .toList();
-
-        // these will be allocated for the game;
         // as many as we can from unplayed pool
-        List<Image> selected = neverPlayedByAnyone.stream()
-                .limit(totalNeeded).collect(Collectors.toList());
+        List<Image> selected = new ArrayList<>(imageRepository.findFreshImages(PageRequest.of(0, totalNeeded)));
 
-        // if not enough, fill with ones played by someone,
-        // by difficulty sorted images
         if (selected.size() < totalNeeded) {
-            int remaining = totalNeeded - selected.size();
-            selected.addAll(playedByOthers.stream()
-                    .limit(remaining)
-                    .toList());
+            selected.addAll(fetchPlayedByOthers(game, totalNeeded - selected.size(), targetDifficulty));
         }
 
-        // if still not enough, look through all images,
-        // also previously played by the user
         if (selected.size() < totalNeeded) {
-            List<Image> allImages = imageRepository.findAll();
-            allImages.removeAll(selected);
-
-            List<Image> previouslyPlayed = allImages.stream()
-                    .filter(img -> img.getTotal() > 0)
-                    .sorted((a, b) -> {
-                        double da = 1.0 - (a.getCorrect() / (double) a.getTotal());
-                        double db = 1.0 - (b.getCorrect() / (double) b.getTotal());
-                        return Double.compare(Math.abs(da - targetDifficulty), Math.abs(db - targetDifficulty));
-                    })
-                    .limit(totalNeeded - selected.size())
-                    .toList();
-
-            selected.addAll(previouslyPlayed);
+            selected.addAll(fetchPlayedByUser(game, totalNeeded - selected.size(), targetDifficulty));
         }
 
-        // Defensive check
+        // all images should have fallen within the previous three groups
         if (selected.size() < totalNeeded) {
-            throw new IllegalStateException("Not enough images in DB to create a game");
+            throw new GameDataIncompleteException("Not enough images to create a game.");
         }
 
-        // shuffle and assign into batches
         Collections.shuffle(selected);
         int index = 0;
 
         for (int batch = 1; batch <= game.getBatchCount(); batch++) {
             for (int i = 0; i < game.getBatchSize(); i++) {
-                Image image = selected.get(index++);
-                ImageGame ig = new ImageGame();
-                ig.setGame(game);
-                ig.setImage(image);
-                ig.setBatchNumber(batch);
-                imageGameRepository.save(ig);
+                imageGameRepository.save(new ImageGame(game, selected.get(index++), batch));
             }
         }
+    }
+
+    private List<Image> fetchPlayedByOthers(Game game, int remaining, double difficulty) {
+        return imageRepository.findPlayedByOthersSortedByDifficulty(
+                game.getUser(), difficulty, PageRequest.of(0, remaining));
+    }
+
+    private List<Image> fetchPlayedByUser(Game game, int remaining, double difficulty) {
+        return imageRepository.findPlayedByUserSortedByDifficulty(
+                game.getUser(), difficulty, PageRequest.of(0, remaining));
+    }
+
+    public void allocateTwoImageBatch(Game game) {
+        int batchCount = game.getBatchCount();
+        double targetDifficulty = game.getDifficulty() / 100.0;
+
+        List<Image> realImages = fetchImagesByFakeness(game, false, batchCount, targetDifficulty);
+        List<Image> fakeImages = fetchImagesByFakeness(game, true, batchCount, targetDifficulty);
+
+        if (realImages.size() < batchCount || fakeImages.size() < batchCount) {
+            throw new GameDataIncompleteException("Not enough real/fake images to create paired batches.");
+        }
+
+        Collections.shuffle(realImages);
+        Collections.shuffle(fakeImages);
+
+        for (int batch = 1; batch <= batchCount; batch++) {
+            Image real = realImages.get(batch - 1);
+            Image fake = fakeImages.get(batch - 1);
+
+            List<Image> pair = new ArrayList<>(List.of(real, fake));
+            Collections.shuffle(pair); // randomize order of real & fake
+
+            imageGameRepository.save(new ImageGame(game, pair.get(0), batch));
+            imageGameRepository.save(new ImageGame(game, pair.get(1), batch));
+        }
+    }
+
+    private List<Image> fetchImagesByFakeness(Game game, boolean isFake, int needed, double difficulty) {
+        List<Image> result = new ArrayList<>(imageRepository.findFreshByFakeness(isFake, PageRequest.of(0, needed)));
+
+        if (result.size() < needed) {
+            int remaining = needed - result.size();
+            result.addAll(imageRepository.findPlayedByOthersByFakeness(game.getUser(), difficulty, isFake, PageRequest.of(0, remaining)));
+        }
+
+        if (result.size() < needed) {
+            int remaining = needed - result.size();
+            result.addAll(imageRepository.findPlayedByUserByFakeness(game.getUser(), difficulty, isFake, PageRequest.of(0, remaining)));
+        }
+
+        return result;
     }
 }

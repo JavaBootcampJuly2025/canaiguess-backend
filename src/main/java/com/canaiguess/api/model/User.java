@@ -23,10 +23,10 @@ public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // shall NOT be exposed
 
     @Column(unique = true,  nullable = false)
-    private String username;
+    private String username; // can be used as a public id
 
     @Column(unique = true,  nullable = false)
     private String email;
@@ -35,11 +35,24 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Integer score = 0;
 
+    @Column(nullable = false)
+    private Integer totalGuesses = 0; // derived field
+
+    @Column(nullable = false)
+    private Integer correctGuesses = 0;  // derived field
+
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Game> games;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ImageReport> submittedReports;
+
+    @OneToMany(mappedBy = "reviewer", cascade = CascadeType.ALL)
+    private List<ImageReport> reviewedReports;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -64,5 +77,9 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public boolean isAdmin() {
+        return this.role == Role.ADMIN;
     }
 }

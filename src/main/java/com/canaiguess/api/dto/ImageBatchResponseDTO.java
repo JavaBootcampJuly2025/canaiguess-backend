@@ -9,5 +9,5 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ImageBatchResponseDTO {
-    private List<String> images;
+    private List<ImageDTO> images;
 }

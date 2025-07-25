@@ -5,14 +5,105 @@ import com.canaiguess.api.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ImageRepository extends JpaRepository<Image, Long> {
-    @Query("SELECT i FROM Image i WHERE i.id NOT IN (SELECT ig.image.id FROM ImageGame ig WHERE ig.game.user = :user)")
-    List<Image> findUnplayedImagesByUser(@Param("user") User user);
 
-    Optional<Image> findByFilename(String filename);
+    Optional<Image> findByPublicIdAndDeletedFalse(String publicId);
+
+    Optional<Image> findByPublicId(String publicId);
+
+    boolean existsByPublicId(String publicId);
+
+    Page<Image> findAllByDeletedTrue(Pageable pageable);
+
+    // find images played by no one
+    @Query("""
+        SELECT i FROM Image i
+        WHERE i.total = 0
+    """)
+    List<Image> findFreshImages(Pageable pageable);
+
+    // find images played by someone but not the user
+    @Query("""
+        SELECT i FROM Image i
+        WHERE i.total > 0
+        AND i.deleted = false
+        AND i.id NOT IN (
+             SELECT ig.image.id
+             FROM ImageGame ig
+             WHERE ig.game.user = :user
+       )
+        ORDER BY ABS((1.0 - (i.correct * 1.0 / i.total)) - :targetDifficulty)
+    """)
+    List<Image> findPlayedByOthersSortedByDifficulty(
+            @Param("user") User user,
+            @Param("targetDifficulty") double targetDifficulty,
+            Pageable pageable
+    );
+
+    // find images played by the user
+    @Query("""
+        SELECT i FROM Image i
+        WHERE i.total > 0
+        AND i.deleted = false
+        AND i.id IN (
+             SELECT ig.image.id
+             FROM ImageGame ig
+             WHERE ig.game.user = :user
+       )
+        ORDER BY ABS((1.0 - (i.correct * 1.0 / i.total)) - :targetDifficulty)
+    """)
+    List<Image> findPlayedByUserSortedByDifficulty(
+            @Param("user") User user,
+            @Param("targetDifficulty") double targetDifficulty,
+            Pageable pageable
+    );
+
+    // fresh real or fake
+    @Query("SELECT i FROM Image i WHERE i.total = 0 AND i.fake = :isFake")
+    List<Image> findFreshByFakeness(@Param("isFake") boolean isFake, Pageable pageable);
+
+    // played by others, sorted by difficulty
+    @Query("""
+        SELECT i FROM Image i
+        WHERE i.total > 0 AND i.fake = :isFake
+        AND i.deleted = false
+        AND NOT EXISTS (
+            SELECT 1 FROM ImageGame ig
+            JOIN ig.game g
+            WHERE ig.image = i AND g.user = :user
+        )
+        ORDER BY ABS((1.0 - (i.correct * 1.0 / i.total)) - :targetDifficulty)
+    """)
+    List<Image> findPlayedByOthersByFakeness(
+            @Param("user") User user,
+            @Param("targetDifficulty") double targetDifficulty,
+            @Param("isFake") boolean isFake,
+            Pageable pageable
+    );
+
+    // played by user
+    @Query("""
+        SELECT i FROM Image i
+        WHERE i.total > 0 AND i.fake = :isFake
+        AND i.deleted = false
+        AND EXISTS (
+            SELECT 1 FROM ImageGame ig
+            JOIN ig.game g
+            WHERE ig.image = i AND g.user = :user
+        )
+        ORDER BY ABS((1.0 - (i.correct * 1.0 / i.total)) - :targetDifficulty)
+    """)
+    List<Image> findPlayedByUserByFakeness(
+            @Param("user") User user,
+            @Param("targetDifficulty") double targetDifficulty,
+            @Param("isFake") boolean isFake,
+            Pageable pageable
+    );
 
 }

@@ -1,11 +1,9 @@
 package com.canaiguess.api.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.RandomStringUtils;
 
 import java.util.List;
 
@@ -14,10 +12,13 @@ import java.util.List;
 @Setter
 public class Image {
     @Id
-    @GeneratedValue
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id; // shall NOT be exposed anywhere
 
-    private String filename;
+    @Column(unique = true, nullable = false)
+    private String publicId; // can be exposed to frontend
+
+    private String url;
 
     private boolean fake; // true = ai, false = real
 
@@ -25,7 +26,19 @@ public class Image {
 
     private int correct; // correct guesses
 
-    @OneToMany(mappedBy = "image")
+    @Column(nullable = false)
+    private boolean deleted = false;
+
+    @OneToMany(mappedBy = "image", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ImageGame> imageGames;
 
+    @OneToMany(mappedBy = "image", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ImageReport> reports;
+
+    @PrePersist
+    public void ensurePublicId() {
+        if (this.publicId == null) {
+            this.publicId = RandomStringUtils.randomAlphanumeric(8).toLowerCase();
+        }
+    }
 }

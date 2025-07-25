@@ -1,7 +1,25 @@
 services:
+  db:
+    image: postgres:16
+    container_name: canaiguess-db
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - canaiguess-net
+
   app:
     build: .
     container_name: canaiguess-app
+    depends_on:
+      - db
     env_file:
       - .env
     environment:
@@ -9,10 +27,22 @@ services:
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      CAPTCHA_SECRET_KEY: ${CAPTCHA_SECRET_KEY}
+      CLOUDFLARE_R2_ACCESS_KEY: ${CLOUDFLARE_R2_ACCESS_KEY}
+      CLOUDFLARE_R2_SECRET_KEY: ${CLOUDFLARE_R2_SECRET_KEY}
+      CLOUDFLARE_R2_BUCKET_NAME: ${CLOUDFLARE_R2_BUCKET_NAME}
+      CLOUDFLARE_R2_ENDPOINT: ${CLOUDFLARE_R2_ENDPOINT}
+
+
     ports:
       - "8080:8080"
     networks:
       - canaiguess-net
-
+      
 networks:
   canaiguess-net:
+
+volumes:
+  postgres_data:

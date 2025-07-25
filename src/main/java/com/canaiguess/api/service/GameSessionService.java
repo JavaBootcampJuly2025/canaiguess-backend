@@ -1,5 +1,8 @@
 package com.canaiguess.api.service;
 
+import com.canaiguess.api.dto.ImageDTO;
+import com.canaiguess.api.exception.GameDataIncompleteException;
+import com.canaiguess.api.exception.UnauthorizedAccessException;
 import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.Image;
 import com.canaiguess.api.model.ImageGame;
@@ -7,13 +10,14 @@ import com.canaiguess.api.model.User;
 import com.canaiguess.api.repository.GameRepository;
 import com.canaiguess.api.repository.ImageGameRepository;
 import com.canaiguess.api.repository.ImageRepository;
-import com.canaiguess.api.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class GameSessionService {
 
     private final ScoringService scoringService;
@@ -21,46 +25,40 @@ public class GameSessionService {
     private final ImageGameRepository imageGameRepository;
     private final GameRepository gameRepository;
 
-    public GameSessionService(ImageRepository imageRepository,
-                            ImageGameRepository imageGameRepository,
-                            GameRepository gameRepository,
-                            ScoringService scoringService) {
+    public List<Boolean> validateGuesses(String gameId, User user, List<Boolean> guesses) {
+        Game game = gameRepository.findByPublicId(gameId)
+                .orElseThrow(() -> new GameDataIncompleteException("Game not found by gameId: " + gameId));
 
-        this.imageRepository = imageRepository;
-        this.imageGameRepository = imageGameRepository;
-        this.gameRepository = gameRepository;
-        this.scoringService = scoringService;
-    }
-
-    public List<Boolean> validateGuesses(Long gameId, User user, List<Boolean> guesses) {
-        Game game = gameRepository.findById(gameId)
-                .orElseThrow(() -> new RuntimeException("Game not found"));
-
-        if (!game.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Unauthorized access to game");
+        if (game.getUser() != null && !game.getUser().getId().equals(user.getId())) {
+            throw new UnauthorizedAccessException("Unauthorized access to the game");
         }
 
         int batch = game.getCurrentBatch();
-
         List<ImageGame> imageGames = imageGameRepository.findByGameAndBatchNumber(game, batch);
 
+        if (guesses == null || guesses.isEmpty()) {
+            throw new GameDataIncompleteException("No guesses provided for validation.");
+        }
         if (imageGames.size() != guesses.size()) {
-            throw new RuntimeException("Mismatched guesses and images in batch");
+            throw new GameDataIncompleteException("Mismatched guesses and images in batch");
         }
 
         List<Boolean> correct = new ArrayList<>();
+        int correctCount = 0;
+
         for (int i = 0; i < imageGames.size(); i++) {
             ImageGame ig = imageGames.get(i);
             Image image = ig.getImage();
             boolean userGuess = guesses.get(i);
             boolean isAI = image.isFake();
 
-            // stats update
             image.setTotal(image.getTotal() + 1);
+
             if (userGuess == isAI) {
                 image.setCorrect(image.getCorrect() + 1);
                 ig.setUserGuessedCorrectly(true);
                 correct.add(true);
+                correctCount++;
             } else {
                 ig.setUserGuessedCorrectly(false);
                 correct.add(false);
@@ -70,41 +68,46 @@ public class GameSessionService {
             imageGameRepository.save(ig);
         }
 
+        // Update derived stats on game
+        game.setCorrectGuesses(game.getCorrectGuesses() + correctCount);
+        game.setTotalGuesses(game.getTotalGuesses() + guesses.size());
         game.setCurrentBatch(batch + 1);
-
-        // if this was the final batch, finish and score
-        if (batch == game.getBatchCount()) {
-            scoringService.updateUserPoints(game);
-            game.setFinished(true);
-        }
-
         gameRepository.save(game);
+
+        // score game after final batch
+        if (batch == game.getBatchCount()) {
+            scoringService.updateScore(game);
+        }
 
         return correct;
     }
 
 
-    public List<String> getNextBatchForGame(long gameId, User user) {
-        Game game = gameRepository.findById(gameId)
-                .orElseThrow(() -> new RuntimeException("Game not found"));
+    public List<ImageDTO> getNextBatchForGame(String gameId, User user) {
+        Game game = gameRepository.findByPublicId(gameId)
+                .orElseThrow(() -> new GameDataIncompleteException("Game not found by publicId: " + gameId));
 
-        if (!game.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Unauthorized access to game");
+        if (game.getUser() != null && !game.getUser().getId().equals(user.getId())) {
+            throw new UnauthorizedAccessException("Unauthorized access to the game");
         }
 
         if (game.isFinished()) {
-            throw new RuntimeException("Game is already finished");
+            throw new GameDataIncompleteException("Game is already finished!");
         }
 
         int currentBatch = game.getCurrentBatch();
-
         List<ImageGame> imageGames = imageGameRepository.findByGameAndBatchNumber(game, currentBatch);
+
         if (imageGames.isEmpty()) {
-            throw new RuntimeException("No images found for current batch");
+            throw new GameDataIncompleteException("No images found for current batch");
         }
 
         return imageGames.stream()
-                .map(ig -> ig.getImage().getFilename())
+                .map(ig -> new ImageDTO(
+                        ig.getImage().getPublicId(),
+                        ig.getImage().getUrl()
+                ))
                 .toList();
     }
+
 }

@@ -1,29 +1,30 @@
 package com.canaiguess.api.service;
 
-import com.canaiguess.api.dto.LeaderboardDTO;
+import com.canaiguess.api.dto.UserDTO;
+import com.canaiguess.api.model.Game;
 import com.canaiguess.api.model.User;
+import com.canaiguess.api.repository.GameRepository;
 import com.canaiguess.api.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
-public class LeaderboardService
-{
+@RequiredArgsConstructor
+public class LeaderboardService {
 
     private final UserRepository userRepository;
+    private final GameRepository gameRepository;
 
-    public LeaderboardService(UserRepository userRepository)
-    {
-        this.userRepository = userRepository;
-    }
-
-    public List<LeaderboardDTO> getLeaderboard()
-    {
+    public List<UserDTO> getLeaderboard() {
         List<User> topUsers = userRepository.findTop10ByOrderByScoreDesc();
+
         return topUsers.stream()
-                .map(user -> new LeaderboardDTO(user.getUsername(), user.getScore()))
-                .collect(Collectors.toList());
+            .map(user -> {
+                int totalGames = gameRepository.countGamesByUsername(user.getUsername());
+                return UserDTO.from(user, totalGames);
+            })
+            .toList();
     }
 }
