@@ -16,6 +16,9 @@
 CANAIGUESS is a Backend API for an interactive game where players try to determine:  
 **Was this image made by AI, or is it real?**
 
+Demo showcase:
+https://youtu.be/r8REJZ0IzjU
+
 ## 📚 Table of Contents
 - [Backend Stack](#backend-stack)
 - [Frontend Project](#frontend-project)
