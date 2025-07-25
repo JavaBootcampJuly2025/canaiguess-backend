@@ -74,7 +74,8 @@ Deployed with Netlify from [canaiguess-frontend repository](https://github.com/J
 
 Database logical model:
 
-<img src="https://github.com/user-attachments/assets/87d49fab-e36c-45d3-8c1e-09dc41faf086" />
+<img src="https://github.com/user-attachments/assets/d536357b-14fa-4088-b8b6-f2dea31e91c3" />
+
 
 Application flowchart schema:
 
