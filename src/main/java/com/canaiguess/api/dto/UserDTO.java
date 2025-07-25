@@ -16,6 +16,7 @@ public class UserDTO
     private Integer totalGuesses;    // all guesses ever
     private Integer correctGuesses;  // all correct guesses ever
     private Integer totalGames;      // total games played
+    private String role;
 
     public static UserDTO from(User user, Integer totalGames) {
         double accuracy = user.getTotalGuesses() > 0
@@ -29,6 +30,7 @@ public class UserDTO
             .totalGuesses(user.getTotalGuesses())
             .correctGuesses(user.getCorrectGuesses())
             .totalGames(totalGames)
+            .role(String.valueOf(user.getRole()))
             .build();
     }
 
